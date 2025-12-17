@@ -8,7 +8,7 @@ import { KEYWORDS } from "./keywords.js";
 /* ================== CONFIG ================== */
 const BOT_TOKEN = "7884775926:AAF9x36fBXeuB2iCUn0AHqoBUZuPXGO61C0";
 const CHAT_ID  = "6837315281";
-const INTERVAL = 5 * 60 * 1000; // 5 دقائق
+const INTERVAL = 5 * 60 * 1000; // 1 دقائق
 const PORT = process.env.PORT || 10000;
 
 /* ================== STORAGE ================== */
