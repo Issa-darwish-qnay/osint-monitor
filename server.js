@@ -8,7 +8,7 @@ import { KEYWORDS } from "./keywords.js";
 /* ================== CONFIG ================== */
 const BOT_TOKEN = "7884775926:AAF9x36fBXeuB2iCUn0AHqoBUZuPXGO61C0";
 const CHAT_ID  = "6837315281";
-const INTERVAL = 5 * 60 * 1000; // 1 دقائق
+const INTERVAL = 5 * 60 * 1000; // 5 دقائق
 const PORT = process.env.PORT || 10000;
 
 /* ================== STORAGE ================== */
@@ -77,10 +77,7 @@ const SOURCES = [
   { name:"Google News AR", url:"https://news.google.com/rss/search?q=الدريهمي&hl=ar&gl=YE&ceid=YE:ar" },
   { name:"Google News EN", url:"https://news.google.com/rss/search?q=Durayhimi" },
   { name:"GDELT", url:"https://api.gdeltproject.org/api/v2/doc/doc?query=الدريهمي&mode=artlist&format=rss" },
-  { name:"Reddit", url:"https://www.reddit.com/search.rss?q=Durayhimi" },
-
-  { name:"Social Mirror AR", url:"https://news.google.com/rss/search?q=الدريهمي+site:facebook.com+OR+site:x.com" },
-  { name:"Social Mirror EN", url:"https://news.google.com/rss/search?q=Durayhimi+site:twitter.com" }
+  { name:"Reddit", url:"https://www.reddit.com/search.rss?q=Durayhimi" }
 ];
 
 /* ================== MEDIA ================== */
@@ -112,28 +109,12 @@ async function scan(){
         fs.writeFileSync(sentFile, JSON.stringify([...sent]));
 
         const threat = threatLevel(text);
-        const type   = contentType(text);
-
-        const record = {
-          time: new Date().toISOString(),
-          source: src.name,
-          title: item.title,
-          link: item.link,
-          threat,
-          type
-        };
-
-        daily.push(record);
-        fs.writeFileSync(dailyFile, JSON.stringify(daily,null,2));
-
-        /* 🔔 تنبيه فوري للتهديد المرتفع فقط */
         if(threat === "🔥 مرتفع"){
           await sendMsg(
             `🚨 تنبيه فوري عالي الخطورة\n\nالمصدر: ${src.name}\n${item.title}\n${item.link}`
           );
         }
 
-        /* 📎 وسائط */
         for(const m of extractMedia(item)){
           if(m.match(/\.(jpg|png|jpeg)$/i)) await sendPhoto(m,item.title);
           else if(m.match(/\.(pdf|doc|docx)$/i)) await sendDoc(m,item.title);
@@ -150,18 +131,11 @@ setInterval(async ()=>{
   if(!daily.length) return;
 
   let report = `📄 تقرير يومي استخباراتي\n\n`;
-  report += `التاريخ: ${new Date().toLocaleDateString("ar-YE")}\n`;
-  report += `المكان: مديرية الدريهمي – محافظة الحديدة\n`;
-  report += `درجة السرية: عادي\n\n`;
-  report += `الملخص التنفيذي:\nرصد آلي مفتوح المصدر خلال 24 ساعة.\n\n`;
-  report += `الأحداث:\n\n`;
-
   daily.forEach((d,i)=>{
-    report += `${i+1}. ${d.type} | ${d.threat}\n${d.title}\n${d.link}\n\n`;
+    report += `${i+1}. ${d.title}\n${d.link}\n\n`;
   });
 
   await sendMsg(report.slice(0,4000));
-
   daily=[];
   fs.writeFileSync(dailyFile,"[]");
 }, 24*60*60*1000);
@@ -169,9 +143,19 @@ setInterval(async ()=>{
 /* ================== DASHBOARD ================== */
 const app = express();
 app.get("/",(_,res)=>{
-  res.send(`<h2>OSINT Monitor</h2><pre>${JSON.stringify(daily,null,2)}</pre>`);
+  res.send(`<h2>OSINT Monitor</h2><p>Status: Running</p>`);
 });
 app.listen(PORT,()=>console.log("Dashboard on",PORT));
+
+/* ================== SELF PING (الحل) ================== */
+setInterval(async () => {
+  try {
+    await fetch(`http://localhost:${PORT}`);
+    console.log("Self ping OK");
+  } catch (e) {
+    console.log("Ping failed");
+  }
+}, 60 * 1000);
 
 /* ================== START ================== */
 sendMsg("✅ OSINT Monitor Started");
