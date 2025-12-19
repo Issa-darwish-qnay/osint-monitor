@@ -8,7 +8,7 @@ import { KEYWORDS } from "./keywords.js";
 /* ================== CONFIG ================== */
 const BOT_TOKEN = "7884775926:AAF9x36fBXeuB2iCUn0AHqoBUZuPXGO61C0";
 const CHAT_ID  = "6837315281";
-const INTERVAL = 5 * 60 * 1000; // 5 دقائق
+const INTERVAL = 5 * 60 * 1000;
 const PORT = process.env.PORT || 10000;
 
 /* ================== STORAGE ================== */
@@ -24,15 +24,27 @@ let daily   = JSON.parse(fs.readFileSync(dailyFile));
 /* ================== PARSER ================== */
 const parser = new Parser({ timeout: 20000 });
 
-/* ================== URL SAFE ================== */
-function safeURL(url){
-  try{
-    const u = new URL(url);
-    u.search = encodeURI(u.search);
-    return u.toString();
-  }catch{
-    return encodeURI(url);
-  }
+/* ================== UTILS ================== */
+const norm = s => (s||"").toLowerCase();
+const hash = s => crypto.createHash("sha1").update(s).digest("hex");
+
+/* ================== SMART MATCH ================== */
+function smartMatch(text){
+  const t = norm(text);
+
+  for (const k of KEYWORDS.locations)
+    if (t.includes(norm(k))) return { type:"📍 قرية/عزلة", value:k };
+
+  for (const k of KEYWORDS.influencers)
+    if (t.includes(norm(k))) return { type:"👤 مؤثر/صفحة", value:k };
+
+  for (const k of KEYWORDS.officials)
+    if (t.includes(norm(k))) return { type:"🏛️ جهة رسمية", value:k };
+
+  for (const k of KEYWORDS.events)
+    if (t.includes(norm(k))) return { type:"⚠️ حدث", value:k };
+
+  return null;
 }
 
 /* ================== TELEGRAM ================== */
@@ -47,29 +59,14 @@ async function tg(method, data) {
     console.error("Telegram error:", e.message);
   }
 }
-
-const sendMsg   = t => tg("sendMessage", { chat_id: CHAT_ID, text: t });
-const sendPhoto = (u,c="") => tg("sendPhoto",{ chat_id: CHAT_ID, photo:u, caption:c.slice(0,1000) });
-const sendDoc   = (u,c="") => tg("sendDocument",{ chat_id: CHAT_ID, document:u, caption:c.slice(0,1000) });
-
-/* ================== UTILS ================== */
-const norm = s => (s||"").toLowerCase();
-const match = t => KEYWORDS.some(k => norm(t).includes(norm(k)));
-const hash = s => crypto.createHash("sha1").update(s).digest("hex");
+const sendMsg = t => tg("sendMessage", { chat_id: CHAT_ID, text: t });
 
 /* ================== THREAT ANALYSIS ================== */
 function threatLevel(text){
   const t = norm(text);
-  if (/(قصف|استهداف|ضربة|هجوم|عملية|اغتيال|تحذير|تهديد)/.test(t)) return "🔥 مرتفع";
-  if (/(تحرك|بيان|تصريح|مناورة)/.test(t)) return "⚠️ متوسط";
+  if (/(قصف|استهداف|هجوم|انفجار|اغتيال)/.test(t)) return "🔥 مرتفع";
+  if (/(اشتباكات|تحرك|تصريح)/.test(t)) return "⚠️ متوسط";
   return "ℹ️ منخفض";
-}
-
-function contentType(text){
-  const t = norm(text);
-  if (/(عاجل|تحذير|تهديد)/.test(t)) return "🚨 تحذير";
-  if (/(قال|صرح|أعلن)/.test(t)) return "📰 خبر";
-  return "🗨️ ذكر عام";
 }
 
 /* ================== SOURCES ================== */
@@ -80,27 +77,16 @@ const SOURCES = [
   { name:"Reddit", url:"https://www.reddit.com/search.rss?q=Durayhimi" }
 ];
 
-/* ================== MEDIA ================== */
-function extractMedia(item){
-  const out=[];
-  if(item.enclosure?.url) out.push(item.enclosure.url);
-  if(item["media:content"]){
-    const m=item["media:content"];
-    if(Array.isArray(m)) m.forEach(x=>x.url&&out.push(x.url));
-    else if(m.url) out.push(m.url);
-  }
-  return out;
-}
-
 /* ================== MAIN SCAN ================== */
 async function scan(){
   for(const src of SOURCES){
     try{
-      const feed = await parser.parseURL(safeURL(src.url));
+      const feed = await parser.parseURL(src.url);
 
       for(const item of feed.items || []){
         const text = `${item.title} ${item.contentSnippet || ""}`;
-        if(!match(text)) continue;
+        const found = smartMatch(text);
+        if(!found) continue;
 
         const id = hash(item.link + (item.pubDate || ""));
         if(sent.has(id)) continue;
@@ -109,15 +95,25 @@ async function scan(){
         fs.writeFileSync(sentFile, JSON.stringify([...sent]));
 
         const threat = threatLevel(text);
+
+        daily.push({
+          time: new Date().toISOString(),
+          source: src.name,
+          title: item.title,
+          link: item.link,
+          threat,
+          type: found.type,
+          keyword: found.value
+        });
+
         if(threat === "🔥 مرتفع"){
           await sendMsg(
-            `🚨 تنبيه فوري عالي الخطورة\n\nالمصدر: ${src.name}\n${item.title}\n${item.link}`
+            `🚨 تنبيه عاجل\n\n` +
+            `السبب: ${found.type} (${found.value})\n` +
+            `المصدر: ${src.name}\n` +
+            `${item.title}\n` +
+            `${item.link}`
           );
-        }
-
-        for(const m of extractMedia(item)){
-          if(m.match(/\.(jpg|png|jpeg)$/i)) await sendPhoto(m,item.title);
-          else if(m.match(/\.(pdf|doc|docx)$/i)) await sendDoc(m,item.title);
         }
       }
     }catch(e){
@@ -132,7 +128,7 @@ setInterval(async ()=>{
 
   let report = `📄 تقرير يومي استخباراتي\n\n`;
   daily.forEach((d,i)=>{
-    report += `${i+1}. ${d.title}\n${d.link}\n\n`;
+    report += `${i+1}. ${d.type} | ${d.threat}\n${d.title}\n${d.link}\n\n`;
   });
 
   await sendMsg(report.slice(0,4000));
@@ -143,21 +139,11 @@ setInterval(async ()=>{
 /* ================== DASHBOARD ================== */
 const app = express();
 app.get("/",(_,res)=>{
-  res.send(`<h2>OSINT Monitor</h2><p>Status: Running</p>`);
+  res.send(`<h2>OSINT Monitor – الدريهمي</h2><pre>${JSON.stringify(daily,null,2)}</pre>`);
 });
 app.listen(PORT,()=>console.log("Dashboard on",PORT));
 
-/* ================== SELF PING (الحل) ================== */
-setInterval(async () => {
-  try {
-    await fetch(`http://localhost:${PORT}`);
-    console.log("Self ping OK");
-  } catch (e) {
-    console.log("Ping failed");
-  }
-}, 60 * 1000);
-
 /* ================== START ================== */
-sendMsg("✅ OSINT Monitor Started");
+sendMsg("✅ OSINT Monitor Started – الدريهمي");
 scan();
 setInterval(scan, INTERVAL);
