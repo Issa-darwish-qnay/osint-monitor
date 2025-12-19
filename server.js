@@ -24,7 +24,7 @@ let daily   = JSON.parse(fs.readFileSync(dailyFile));
 /* ================== PARSER ================== */
 const parser = new Parser({ timeout: 20000 });
 
-/* ================== URL SAFE (إصلاح 1) ================== */
+/* ================== URL SAFE ================== */
 function safeURL(url){
   try{
     return encodeURI(url);
@@ -46,7 +46,6 @@ async function tg(method, data) {
   }
 }
 
-/* قص الرسائل (إصلاح 3) */
 const sendMsg = t =>
   tg("sendMessage", {
     chat_id: CHAT_ID,
@@ -62,8 +61,25 @@ const sendDoc = (u,c="") =>
 /* ================== UTILS ================== */
 const norm = s => (s||"").toLowerCase();
 
-/* إبقاء KEYWORDS كمصفوفة (إصلاح 2) */
-const match = t => KEYWORDS.some(k => norm(t).includes(norm(k)));
+/* 🔧 التعديل الوحيد هنا (حل KEYWORDS.some) */
+const match = t => {
+  const text = norm(t);
+
+  // إذا KEYWORDS مصفوفة
+  if (Array.isArray(KEYWORDS)) {
+    return KEYWORDS.some(k => text.includes(norm(k)));
+  }
+
+  // إذا KEYWORDS كائن يحتوي مصفوفات
+  for (const group of Object.values(KEYWORDS)) {
+    if (Array.isArray(group)) {
+      if (group.some(k => text.includes(norm(k)))) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
 
 const hash = s => crypto.createHash("sha1").update(s).digest("hex");
 
@@ -88,7 +104,6 @@ const SOURCES = [
   { name:"Google News EN", url:"https://news.google.com/rss/search?q=Durayhimi" },
   { name:"GDELT", url:"https://api.gdeltproject.org/api/v2/doc/doc?query=الدريهمي&mode=artlist&format=rss" },
   { name:"Reddit", url:"https://www.reddit.com/search.rss?q=Durayhimi" },
-
   { name:"Social Mirror AR", url:"https://news.google.com/rss/search?q=الدريهمي+site:facebook.com+OR+site:x.com" },
   { name:"Social Mirror EN", url:"https://news.google.com/rss/search?q=Durayhimi+site:twitter.com" }
 ];
@@ -109,7 +124,6 @@ function extractMedia(item){
 async function scan(){
   for(const src of SOURCES){
     try{
-      /* استخدام safeURL (إصلاح 1) */
       const feed = await parser.parseURL(safeURL(src.url));
 
       for(const item of feed.items || []){
