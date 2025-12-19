@@ -2,11 +2,12 @@
 const config = {
   botToken: "7884775926:AAF9x36fBXeuB2iCUn0AHqoBUZuPXGO61C0",
   chatId: "6837315281",
-  scanInterval: 10 * 60 * 1000, // 10 دقائق لتقليل الحمل
+  scanInterval: 15 * 60 * 1000, // 15 دقيقة لتقليل الحمل مع زيادة التغطية
+  socialMediaScanInterval: 30 * 60 * 1000, // 30 دقيقة لمواقع التواصل
   port: process.env.PORT || 10000,
   dataPath: "./data/",
-  maxRetries: 3,
-  retryDelay: 5000,
+  maxRetries: 5,
+  retryDelay: 10000,
   
   // مصادر موسعة ومتنوعة مع تحيز واضح - مصححة
   sources: [
@@ -16,21 +17,24 @@ const config = {
       url: "https://www.almasirah.net/feed/",
       priority: 1,
       bias: "موالي",
-      category: "رسمي"
+      category: "رسمي",
+      type: "rss"
     },
     {
       name: "وكالة الأنباء اليمنية (سبأ)",
       url: "https://www.saba.ye/ar/feed/",
       priority: 1,
       bias: "موالي",
-      category: "رسمي"
+      category: "رسمي",
+      type: "rss"
     },
     {
       name: "قناة المسيرة",
       url: "https://www.almasirah.net/video-feed/",
       priority: 2,
       bias: "موالي",
-      category: "إعلامي"
+      category: "إعلامي",
+      type: "rss"
     },
     
     // مصادر محلية في الدريهمي - مصححة
@@ -39,14 +43,16 @@ const config = {
       url: "https://www.akhbaralyemen.net/feed/",
       priority: 1,
       bias: "محلي",
-      category: "محلي"
+      category: "محلي",
+      type: "rss"
     },
     {
       name: "اليمن نت - أخبار الحديدة",
       url: "https://www.yemen-nn.com/feed/",
       priority: 2,
       bias: "محلي",
-      category: "محلي"
+      category: "محلي",
+      type: "rss"
     },
     
     // مصادر تعبوية - مصححة
@@ -55,14 +61,8 @@ const config = {
       url: "https://www.ansarollah.com/feed/",
       priority: 2,
       bias: "تعبوي",
-      category: "تعبوي"
-    },
-    {
-      name: "شبكة المقاومة الإسلامية",
-      url: "https://www.moqawama.org/feed/",
-      priority: 3,
-      bias: "تعبوي",
-      category: "تعبوي"
+      category: "تعبوي",
+      type: "rss"
     },
     
     // مصادر تعليمية ودينية - مصححة
@@ -71,7 +71,8 @@ const config = {
       url: "https://www.islamic-study.org/feed/",
       priority: 3,
       bias: "تعليمي",
-      category: "تعليمي"
+      category: "تعليمي",
+      type: "rss"
     },
     
     // مصادر إنسانية - مصححة
@@ -80,146 +81,254 @@ const config = {
       url: "https://www.yemenrc.org/feed/",
       priority: 3,
       bias: "إنساني",
-      category: "إنساني"
-    },
-    
-    // مصادر أمنية - مصححة
+      category: "إنساني",
+      type: "rss"
+    }
+  ],
+  
+  // مرايا مواقع التواصل الاجتماعي (بدون API)
+  socialMediaMirrors: [
+    // مواقع تجميع تغريدات تويتر عن اليمن
     {
-      name: "وزارة الدفاع اليمنية",
-      url: "https://www.yemen.gov.ye/defense/feed/",
+      name: "تغريدات عن الدريهمي - Nitter",
+      url: "https://nitter.net/search?f=tweets&q=%22%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A%22+OR+%22%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A%22+%23%D8%A7%D9%84%D9%8A%D9%85%D9%86",
+      priority: 1,
+      bias: "اجتماعي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "twitter"
+    },
+    {
+      name: "تغريدات أنصار الله - Nitter",
+      url: "https://nitter.net/search?f=tweets&q=%D8%A3%D9%86%D8%B5%D8%A7%D8%B1+%D8%A7%D9%84%D9%84%D9%87+%23%D8%A7%D9%84%D9%8A%D9%85%D9%86",
       priority: 2,
-      bias: "أمني",
-      category: "أمني"
+      bias: "موالي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "twitter"
+    },
+    {
+      name: "أخبار الحديدة - Twitter Search",
+      url: "https://nitter.net/search?f=tweets&q=%23%D8%A7%D9%84%D8%AD%D8%AF%D9%8A%D8%AF%D8%A9+OR+%23%D8%A7%D9%84%D9%85%D8%AF%D9%8A%D8%B1%D9%8A%D8%A9_%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A",
+      priority: 2,
+      bias: "محلي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "twitter"
     },
     
-    // مصادر اقتصادية - مصححة
+    // مواقع تجميع منشورات فيسبوك
     {
-      name: "الاقتصاد اليمني",
-      url: "https://www.yemeneconomy.com/feed/",
-      priority: 3,
-      bias: "اقتصادي",
-      category: "اقتصادي"
+      name: "منشورات فيسبوك عن الدريهمي - FB-Tracking",
+      url: "https://fb.watch/search/?q=%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A+%D8%A7%D9%84%D9%8A%D9%85%D9%86",
+      priority: 2,
+      bias: "اجتماعي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "facebook"
     },
     
-    // مصادر اجتماعية - مصححة
+    // مواقع تجميع قنوات تليجرام
     {
-      name: "الشبكة الاجتماعية اليمنية",
-      url: "https://www.yemensocial.net/feed/",
+      name: "قنوات تليجرام يمنية - TGStat",
+      url: "https://tgstat.com/search?q=%D8%A7%D9%84%D9%8A%D9%85%D9%86+%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A",
       priority: 3,
       bias: "اجتماعي",
-      category: "اجتماعي"
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "telegram"
     },
     
-    // مصادر دولية تتناول اليمن - بديلة عن Google News
+    // مدونات ونقاط تجميع
     {
-      name: "العربية - اليمن",
-      url: "https://www.alarabiya.net/feed/tags/Yemen",
+      name: "مجمع أخبار يمنية - Yemen Social",
+      url: "https://www.yemensocial.net/search/label/%D8%A7%D9%84%D8%AF%D8%B1%D9%8A%D9%87%D9%85%D9%8A",
       priority: 2,
-      bias: "إقليمي",
-      category: "دولي"
+      bias: "اجتماعي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "aggregator"
     },
+    
+    // مواقع تقارير إخبارية من تويتر
     {
-      name: "فرانس 24 - اليمن",
-      url: "https://www.france24.com/ar/tag/اليمن/rss",
-      priority: 2,
-      bias: "دولي",
-      category: "دولي"
+      name: "Twitter Moments Yemen",
+      url: "https://tweettopik.com/search/%D8%A7%D9%84%D9%8A%D9%85%D9%86",
+      priority: 3,
+      bias: "اجتماعي",
+      category: "تواصل_اجتماعي",
+      type: "web_scrape",
+      platform: "twitter"
     }
   ],
   
   // كلمات مفتاحية موسعة مع تحيز واضح
   keywords: {
-    // المواقع الجغرافية في الدريهمي
+    // المواقع الجغرافية في الدريهمي (عربي + إنجليزي)
     locations: [
-      "الدريهمي", "مديرية الدريهمي", "Al Durayhimi", "Durayhimi",
+      "الدريهمي", "مديرية الدريهمي", "Al Durayhimi", "Durayhimi", "Al-Durayhimi",
       "بني مرسي", "الحجبة السفلى", "الحجبة العليا", "الجحيا العليا",
       "الزرانيق", "المساعيد", "الزعفران", "الشجن", "الكرد",
       "الكنباحية", "اللاوية", "المحال", "المكيمنية", "المنقم",
       "دير حسن", "رغمين", "غليفقة", "الهايط", "بيت حسن جماعي",
       "خبت قوبع", "وادي الدريهمي", "سوق الدريهمي", "مركز الدريهمي",
-      "مدرسة الدريهمي", "مستشفى الدريهمي", "مسجد الدريهمي"
+      "مدرسة الدريهمي", "مستشفى الدريهمي", "مسجد الدريهمي",
+      // إضافات باللغة الإنجليزية
+      "Durayhimi district", "Al Durayhimi area", "Durayhimi Yemen",
+      "Bani Marsi", "Al-Hajbah", "Al-Jahya", "Al-Zaraniq",
+      "Al-Masa'id", "Al-Za'faran", "Al-Shajan", "Al-Kurd",
+      "Al-Kanbahiyah", "Al-Lawiyah", "Al-Mahal", "Al-Mukayminah",
+      "Dar Hassan", "Rughmayn", "Ghalifqah", "Al-Hayit"
     ],
     
-    // القرى والعزل
+    // القرى والعزل (عربي + إنجليزي)
     villages: [
       "عزلة الجحيا", "عزلة بني مرسي", "عزلة الحجبة", "عزلة الزرانيق",
-      "عزلة المساعيد", "عزلة الكرد", "عزلة الشجن", "عزلة اللاوية"
+      "عزلة المساعيد", "عزلة الكرد", "عزلة الشجن", "عزلة اللاوية",
+      // إضافات باللغة الإنجليزية
+      "Al-Jahya sub-district", "Bani Marsi sub-district", 
+      "Al-Hajbah sub-district", "Al-Zaraniq sub-district",
+      "Al-Masa'id sub-district", "Al-Kurd sub-district",
+      "Al-Shajan sub-district", "Al-Lawiyah sub-district"
     ],
     
-    // الكيانات والتنظيمات الموالية
+    // الكيانات والتنظيمات الموالية (عربي + إنجليزي)
     proHouthi: [
       "أنصار الله", "الحوثيين", "المجلس السياسي الأعلى", "اللجان الشعبية",
       "لجان الأمر بالمعروف", "قائد الثورة", "السيد عبدالملك الحوثي",
       "بدر الدين الحوثي", "الثورة اليمنية", "أنصار الشريعة",
       "المقاومة اليمنية", "الجيش واللجان", "القوات المسلحة اليمنية",
-      "المقاومة الإسلامية", "حركة أنصار الله", "الثورة السبتمبرية"
+      "المقاومة الإسلامية", "حركة أنصار الله", "الثورة السبتمبرية",
+      // إضافات باللغة الإنجليزية
+      "Ansar Allah", "Houthis", "Houthi movement", "Supreme Political Council",
+      "Popular Committees", "Commander of the Revolution", "Abdul-Malik al-Houthi",
+      "Badr al-Din al-Houthi", "Yemeni Revolution", "Ansar al-Sharia",
+      "Yemeni Resistance", "Army and Committees", "Yemeni Armed Forces",
+      "Islamic Resistance", "Ansarullah movement", "September Revolution"
     ],
     
-    // التنظيمات المعادية
+    // التنظيمات المعادية (عربي + إنجليزي)
     antiHouthi: [
       "التحالف العربي", "المجلس الانتقالي", "القوات المشتركة",
       "الشرعية", "هادي", "السعودية", "الإمارات", "أمريكا",
       "الصهاينة", "الكيان الصهيوني", "التنظيمات التكفيرية",
-      "القاعدة", "داعش", "الارهاب", "العدوان"
+      "القاعدة", "داعش", "الارهاب", "العدوان",
+      // إضافات باللغة الإنجليزية
+      "Arab Coalition", "Transitional Council", "Joint Forces",
+      "Legitimacy", "Hadi", "Saudi Arabia", "UAE", "America",
+      "Zionists", "Zionist entity", "Takfiri organizations",
+      "Al-Qaeda", "ISIS", "terrorism", "aggression"
     ],
     
-    // الأحداث العسكرية والتعبوية
+    // الأحداث العسكرية والتعبوية (عربي + إنجليزي)
     military: [
       "مسيرة", "وقفة", "تعبئة", "تأهيل", "جهوزية", "استعداد",
       "تدريب", "مناورة", "تمرين", "استعراض", "تجمهر", "احتشاد",
-      "تدريب عسكري", "تمرين قتالي", "مناورة دفاعية", "استعداد قتالي"
+      "تدريب عسكري", "تمرين قتالي", "مناورة دفاعية", "استعداد قتالي",
+      // إضافات باللغة الإنجليزية
+      "march", "rally", "demonstration", "mobilization", "preparation",
+      "readiness", "training", "maneuver", "exercise", "parade",
+      "gathering", "crowd", "military training", "combat exercise",
+      "defensive maneuver", "combat readiness"
     ],
     
-    // الأحداث الأمنية
+    // الأحداث الأمنية (عربي + إنجليزي)
     security: [
       "دورية", "تفتيش", "مراقبة", "رصد", "حماية", "أمن",
-      "حرس", "شرطة", "أمن مركزي", "دورية أمنية", "تأمين"
+      "حرس", "شرطة", "أمن مركزي", "دورية أمنية", "تأمين",
+      // إضافات باللغة الإنجليزية
+      "patrol", "inspection", "monitoring", "surveillance", "protection",
+      "security", "guard", "police", "central security", "security patrol",
+      "securing"
     ],
     
-    // الشهداء والأحداث الدموية
+    // الشهداء والأحداث الدموية (عربي + إنجليزي)
     martyrs: [
       "شهيد", "شهداء", "استشهاد", "استهداف", "قصف", "غارة",
       "ضحية", "جرحى", "مصاب", "تفجير", "انفجار", "كمين",
-      "استشهادي", "ضحايا", "إصابة", "قتيل"
+      "استشهادي", "ضحايا", "إصابة", "قتيل",
+      // إضافات باللغة الإنجليزية
+      "martyr", "martyrs", "martyrdom", "targeting", "bombing", "airstrike",
+      "victim", "wounded", "injured", "explosion", "blast", "ambush",
+      "suicide bomber", "casualties", "injury", "killed"
     ],
     
-    // الخطاب التعبوي والسياسي
+    // الخطاب التعبوي والسياسي (عربي + إنجليزي)
     rhetoric: [
       "طوفان الأقصى", "غزة", "فلسطين", "المقاومة", "الصمود",
       "النصر", "الجهاد", "المجاهدين", "الأقصى", "القدس",
       "المشروع الصهيوني", "الاستكبار العالمي", "العدوان",
-      "المواجهة", "الصراع", "المعركة", "الثورة", "التضحية"
+      "المواجهة", "الصراع", "المعركة", "الثورة", "التضحية",
+      // إضافات باللغة الإنجليزية
+      "Al-Aqsa Flood", "Gaza", "Palestine", "resistance", "steadfastness",
+      "victory", "jihad", "mujahideen", "Al-Aqsa", "Jerusalem",
+      "Zionist project", "global arrogance", "aggression",
+      "confrontation", "conflict", "battle", "revolution", "sacrifice"
     ],
     
-    // المناسبات والأنشطة
+    // المناسبات والأنشطة (عربي + إنجليزي)
     activities: [
       "تخرج", "دورة", "خريجين", "احتفال", "تكريم", "توزيع",
       "مساعدات", "إغاثة", "تعزيز", "دعم", "تضامن", "وقفة تضامنية",
-      "حفل", "مناسبة", "احتفالية", "احتفاء"
+      "حفل", "مناسبة", "احتفالية", "احتفاء",
+      // إضافات باللغة الإنجليزية
+      "graduation", "course", "graduates", "celebration", "honoring", "distribution",
+      "aid", "relief", "reinforcement", "support", "solidarity", "solidarity stand",
+      "ceremony", "occasion", "festivity", "commemoration"
     ],
     
-    // التعليم والدعوة
+    // التعليم والدعوة (عربي + إنجليزي)
     education: [
       "محاضرة", "ندوة", "درس", "توعية", "تثقيف", "دعوة",
-      "خطبة", "موعظة", "توجيه", "إرشاد", "تأهيل", "تدريس"
+      "خطبة", "موعظة", "توجيه", "إرشاد", "تأهيل", "تدريس",
+      // إضافات باللغة الإنجليزية
+      "lecture", "seminar", "lesson", "awareness", "education", "invitation",
+      "sermon", "advice", "guidance", "counseling", "rehabilitation", "teaching"
     ],
     
-    // الاقتصاد والأسواق
+    // الاقتصاد والأسواق (عربي + إنجليزي)
     economy: [
       "سوق", "تجارة", "بيع", "شراء", "أسعار", "سلع",
-      "مواد", "تسويق", "تجاري", "اقتصاد", "معيشة", "تكاليف"
+      "مواد", "تسويق", "تجاري", "اقتصاد", "معيشة", "تكاليف",
+      // إضافات باللغة الإنجليزية
+      "market", "trade", "selling", "buying", "prices", "goods",
+      "materials", "marketing", "commercial", "economy", "livelihood", "costs"
     ],
     
-    // الصحة والخدمات
+    // الصحة والخدمات (عربي + إنجليزي)
     health: [
       "مستشفى", "مريض", "علاج", "دواء", "صحة", "طبيب",
-      "ممرض", "عيادة", "رعاية", "خدمة", "تطبيب", "إسعاف"
+      "ممرض", "عيادة", "رعاية", "خدمة", "تطبيب", "إسعاف",
+      // إضافات باللغة الإنجليزية
+      "hospital", "patient", "treatment", "medicine", "health", "doctor",
+      "nurse", "clinic", "care", "service", "medical treatment", "ambulance"
     ],
     
-    // البنية التحتية
+    // البنية التحتية (عربي + إنجليزي)
     infrastructure: [
       "طريق", "جسر", "مدرسة", "مسجد", "مكتب", "مبنى",
-      "إنشاء", "بناء", "ترميم", "تطوير", "تحسين", "خدمات"
+      "إنشاء", "بناء", "ترميم", "تطوير", "تحسين", "خدمات",
+      // إضافات باللغة الإنجليزية
+      "road", "bridge", "school", "mosque", "office", "building",
+      "construction", "building", "renovation", "development", "improvement", "services"
+    ],
+    
+    // هاشتاقات شائعة (عربي + إنجليزي)
+    hashtags: [
+      "#الدريهمي", "#الحديدة", "#اليمن", "#أنصار_الله",
+      "#الحوثيين", "#المقاومة_اليمنية", "#غزة", "#فلسطين",
+      // إضافات باللغة الإنجليزية
+      "#Durayhimi", "#Hodeidah", "#Yemen", "#AnsarAllah",
+      "#Houthis", "#YemeniResistance", "#Gaza", "#Palestine"
+    ],
+    
+    // منصات التواصل الاجتماعي
+    socialMediaTerms: [
+      "تغريدة", "تويتر", "فيسبوك", "تليجرام", "انستغرام",
+      "منشور", "بوست", "هاشتاق", "مشاركة", "تعليق",
+      // إضافات باللغة الإنجليزية
+      "tweet", "Twitter", "Facebook", "Telegram", "Instagram",
+      "post", "hashtag", "share", "comment", "social media"
     ]
   }
 };
@@ -232,6 +341,7 @@ import fs from "fs";
 import path from "path";
 import express from "express";
 import { fileURLToPath } from 'url';
+import * as cheerio from 'cheerio';
 
 /* ================== INITIALIZATION ================== */
 const __filename = fileURLToPath(import.meta.url);
@@ -249,6 +359,7 @@ const statsFile = path.join(config.dataPath, "stats.json");
 const reportFile = path.join(config.dataPath, "reports.json");
 const backupFile = path.join(config.dataPath, "backup.json");
 const locationsFile = path.join(config.dataPath, "locations.json");
+const socialMediaFile = path.join(config.dataPath, "social_media.json");
 
 // تهيئة الملفات
 const initFile = (file, defaultValue) => {
@@ -272,15 +383,23 @@ let stats = initFile(statsFile, {
   totalMatches: 0,
   proHouthiEvents: 0,
   antiHouthiEvents: 0,
+  socialMediaMatches: 0,
   lastScan: null,
+  lastSocialScan: null,
   lastReport: null,
   systemStart: new Date().toISOString(),
   locationsActivity: {},
   sourceStats: {},
-  categoryStats: {}
+  categoryStats: {},
+  platformStats: {}
 });
 let reports = initFile(reportFile, []);
 let locationsActivity = initFile(locationsFile, {});
+let socialMediaCache = initFile(socialMediaFile, {
+  lastScans: {},
+  discoveredAccounts: [],
+  trendingHashtags: []
+});
 
 /* ================== BACKUP SYSTEM ================== */
 class BackupSystem {
@@ -292,7 +411,8 @@ class BackupSystem {
         daily: daily,
         stats: stats,
         reports: reports.slice(-5),
-        locationsActivity: locationsActivity
+        locationsActivity: locationsActivity,
+        socialMediaCache: socialMediaCache
       };
       
       fs.writeFileSync(backupFile, JSON.stringify(backupData, null, 2));
@@ -311,6 +431,11 @@ class BackupSystem {
         stats = backupData.stats || {};
         reports = backupData.reports || [];
         locationsActivity = backupData.locationsActivity || {};
+        socialMediaCache = backupData.socialMediaCache || {
+          lastScans: {},
+          discoveredAccounts: [],
+          trendingHashtags: []
+        };
         
         console.log('🔄 تم استعادة البيانات من النسخة الاحتياطية');
         return true;
@@ -322,13 +447,560 @@ class BackupSystem {
   }
 }
 
+/* ================== UTILITY FUNCTIONS ================== */
+function safeURL(url) {
+  try {
+    return encodeURI(decodeURI(url)).replace(/&amp;/g, '&');
+  } catch {
+    return url;
+  }
+}
+
+function normalize(text) {
+  if (!text) return '';
+  return text.toString().toLowerCase()
+    .replace(/[^\w\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF#@]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function generateHash(content) {
+  return crypto.createHash("sha256").update(content).digest("hex");
+}
+
+function saveData() {
+  try {
+    fs.writeFileSync(sentFile, JSON.stringify([...sent], null, 2));
+    fs.writeFileSync(dailyFile, JSON.stringify(daily, null, 2));
+    fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
+    fs.writeFileSync(reportFile, JSON.stringify(reports, null, 2));
+    fs.writeFileSync(locationsFile, JSON.stringify(locationsActivity, null, 2));
+    fs.writeFileSync(socialMediaFile, JSON.stringify(socialMediaCache, null, 2));
+    BackupSystem.backup();
+  } catch (error) {
+    console.error('❌ خطأ في حفظ البيانات:', error.message);
+  }
+}
+
+/* ================== WEB SCRAPER FOR SOCIAL MEDIA ================== */
+class SocialMediaScraper {
+  static async scrapeWebsite(url, platform, retries = config.maxRetries) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`🌐 محاولة ${attempt}/${retries} لجلب ${platform}: ${url}`);
+        
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'ar,en-US;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0'
+          },
+          timeout: 30000
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        
+        let results = [];
+        
+        switch(platform) {
+          case 'twitter':
+            results = this.scrapeTwitter($, url);
+            break;
+          case 'facebook':
+            results = this.scrapeFacebook($, url);
+            break;
+          case 'telegram':
+            results = this.scrapeTelegram($, url);
+            break;
+          case 'aggregator':
+            results = this.scrapeAggregator($, url);
+            break;
+          default:
+            results = this.scrapeGeneric($, url);
+        }
+        
+        return results;
+        
+      } catch (error) {
+        console.error(`❌ محاولة ${attempt} فشلت:`, error.message);
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, config.retryDelay * attempt));
+        } else {
+          console.error(`❌ فشل نهائي في جلب ${platform}:`, error.message);
+          return [];
+        }
+      }
+    }
+  }
+  
+  static scrapeTwitter($, url) {
+    const results = [];
+    
+    // محاولة أشكال مختلفة لتنسيقات Twitter/Nitter
+    $('.timeline-item, .tweet, .timeline-item, .timeline-Tweet, .tweet-wrapper').each((i, elem) => {
+      try {
+        const $elem = $(elem);
+        let text = '';
+        let author = '';
+        let timestamp = '';
+        let link = '';
+        
+        // استخراج النص
+        text = $elem.find('.tweet-content, .tweet-body, .tweet-text, .timeline-Tweet-text').text().trim();
+        
+        // استخراج المؤلف
+        author = $elem.find('.fullname, .username, .tweet-header .username, .tweet-poster').text().trim();
+        
+        // استخراج الوقت
+        timestamp = $elem.find('.tweet-date, .tweet-timestamp, .tweet-time, .date').attr('title') || 
+                    $elem.find('.tweet-date, .tweet-timestamp, .tweet-time, .date').text().trim();
+        
+        // استخراج الرابط
+        const tweetLink = $elem.find('.tweet-link, .tweet-permalink').attr('href');
+        link = tweetLink ? `https://nitter.net${tweetLink}` : url;
+        
+        if (text && this.containsKeywords(text)) {
+          results.push({
+            text: text.substring(0, 500),
+            author: author,
+            timestamp: timestamp || new Date().toISOString(),
+            link: link,
+            platform: 'twitter',
+            source_url: url
+          });
+        }
+      } catch (e) {
+        console.error('❌ خطأ في استخراج تغريدة:', e.message);
+      }
+    });
+    
+    // إذا لم نجد نتائج، نبحث عن أي نص يحتوي على الكلمات المفتاحية
+    if (results.length === 0) {
+      $('body').text().split('\n').forEach(line => {
+        if (line.trim() && this.containsKeywords(line) && line.length > 50) {
+          results.push({
+            text: line.substring(0, 500),
+            author: 'غير معروف',
+            timestamp: new Date().toISOString(),
+            link: url,
+            platform: 'twitter',
+            source_url: url
+          });
+        }
+      });
+    }
+    
+    return results;
+  }
+  
+  static scrapeFacebook($, url) {
+    const results = [];
+    
+    $('[id*="post"], [class*="post"], [role="article"], .userContent, ._5pcr').each((i, elem) => {
+      try {
+        const $elem = $(elem);
+        let text = $elem.find('.userContent, ._5pbx, [data-testid="post_message"]').text().trim();
+        
+        if (!text) {
+          text = $elem.text().trim();
+        }
+        
+        if (text && this.containsKeywords(text)) {
+          const author = $elem.find('.fwb, ._6qw4, [data-testid="post_author_link"]').text().trim() || 'غير معروف';
+          
+          results.push({
+            text: text.substring(0, 500),
+            author: author,
+            timestamp: new Date().toISOString(),
+            link: url,
+            platform: 'facebook',
+            source_url: url
+          });
+        }
+      } catch (e) {
+        console.error('❌ خطأ في استخراج منشور فيسبوك:', e.message);
+      }
+    });
+    
+    return results;
+  }
+  
+  static scrapeTelegram($, url) {
+    const results = [];
+    
+    $('.tgme_widget_message, .message, .tgme_channel_history').each((i, elem) => {
+      try {
+        const $elem = $(elem);
+        const text = $elem.find('.tgme_widget_message_text, .message_text').text().trim();
+        
+        if (text && this.containsKeywords(text)) {
+          const author = $elem.find('.tgme_widget_message_author, .message_author').text().trim() || 'غير معروف';
+          
+          results.push({
+            text: text.substring(0, 500),
+            author: author,
+            timestamp: new Date().toISOString(),
+            link: url,
+            platform: 'telegram',
+            source_url: url
+          });
+        }
+      } catch (e) {
+        console.error('❌ خطأ في استخراج رسالة تليجرام:', e.message);
+      }
+    });
+    
+    return results;
+  }
+  
+  static scrapeAggregator($, url) {
+    const results = [];
+    
+    // البحث عن أي محتوى قد يكون من وسائل التواصل الاجتماعي
+    $('article, .post, .entry, .item, [class*="tweet"], [class*="post"]').each((i, elem) => {
+      try {
+        const $elem = $(elem);
+        const text = $elem.text().trim();
+        
+        if (text && this.containsKeywords(text) && text.length > 100) {
+          const author = $elem.find('.author, .byline, .posted-by').text().trim() || 'غير معروف';
+          const time = $elem.find('.time, .date, .timestamp').text().trim() || new Date().toISOString();
+          const linkElem = $elem.find('a').first();
+          const link = linkElem.attr('href') ? new URL(linkElem.attr('href'), url).href : url;
+          
+          results.push({
+            text: text.substring(0, 500),
+            author: author,
+            timestamp: time,
+            link: link,
+            platform: 'aggregator',
+            source_url: url
+          });
+        }
+      } catch (e) {
+        console.error('❌ خطأ في استخراج محتوى تجميعي:', e.message);
+      }
+    });
+    
+    return results;
+  }
+  
+  static scrapeGeneric($, url) {
+    const results = [];
+    const bodyText = $('body').text();
+    
+    // البحث عن أي إشارة إلى وسائل التواصل الاجتماعي
+    if (bodyText.includes('twitter.com/') || bodyText.includes('tweet') || 
+        bodyText.includes('facebook.com/') || bodyText.includes('post') ||
+        bodyText.includes('telegram.me/') || bodyText.includes('t.me/')) {
+      
+      // استخراج أجزاء النص التي تحتوي على الكلمات المفتاحية
+      const lines = bodyText.split('\n');
+      lines.forEach(line => {
+        if (this.containsKeywords(line) && line.length > 50) {
+          results.push({
+            text: line.substring(0, 500),
+            author: 'غير معروف',
+            timestamp: new Date().toISOString(),
+            link: url,
+            platform: 'generic',
+            source_url: url
+          });
+        }
+      });
+    }
+    
+    return results;
+  }
+  
+  static containsKeywords(text) {
+    const normText = normalize(text);
+    
+    // فحص جميع الكلمات المفتاحية
+    for (const category in config.keywords) {
+      for (const keyword of config.keywords[category]) {
+        if (normText.includes(normalize(keyword))) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  static async discoverNewSources() {
+    const discovered = [];
+    const searchTerms = [
+      'الدريهمي اليمن تويتر',
+      'الحديدة تويتر',
+      'أنصار الله تويتر',
+      'اليمن فيسبوك',
+      'اليمن تليجرام',
+      'Durayhimi Yemen Twitter',
+      'Hodeidah Twitter',
+      'Ansar Allah Telegram'
+    ];
+    
+    for (const term of searchTerms) {
+      try {
+        // استخدام محركات بحث بديلة للعثور على مصادر
+        const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(term)}`;
+        const response = await fetch(searchUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        });
+        
+        if (response.ok) {
+          const html = await response.text();
+          const $ = cheerio.load(html);
+          
+          $('.result__url').each((i, elem) => {
+            const url = $(elem).text().trim();
+            if (url && (url.includes('twitter.com/') || url.includes('facebook.com/') || 
+                       url.includes('t.me/') || url.includes('telegram.me/'))) {
+              
+              // تحويل روابط تويتر إلى nitter (بدون تسجيل دخول)
+              let cleanUrl = url;
+              if (url.includes('twitter.com/')) {
+                const username = url.split('twitter.com/')[1]?.split('/')[0];
+                if (username) {
+                  cleanUrl = `https://nitter.net/${username}`;
+                }
+              }
+              
+              if (!socialMediaCache.discoveredAccounts.includes(cleanUrl)) {
+                discovered.push({
+                  url: cleanUrl,
+                  platform: url.includes('twitter.com') ? 'twitter' : 
+                          url.includes('facebook.com') ? 'facebook' : 'telegram',
+                  discovered_at: new Date().toISOString()
+                });
+              }
+            }
+          });
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+      } catch (error) {
+        console.error(`❌ خطأ في اكتشاف مصادر لـ ${term}:`, error.message);
+      }
+    }
+    
+    return discovered;
+  }
+}
+
+/* ================== ADVANCED INTELLIGENCE ANALYSIS ================== */
+class AdvancedIntelligenceAnalyzer {
+  static analyze(text, source, platform = 'rss') {
+    const normText = normalize(text);
+    const analysis = {
+      score: 0,
+      type: "ذكر عادي",
+      category: "عام",
+      priority: "منخفض",
+      bias: "محايد",
+      platform: platform,
+      entities: {
+        proHouthi: [],
+        antiHouthi: [],
+        locations: [],
+        villages: [],
+        events: [],
+        categories: [],
+        hashtags: [],
+        socialMediaTerms: []
+      },
+      sentiment: "محايد",
+      recommendations: [],
+      confidence: 60,
+      timeContext: this.analyzeTimeContext(text),
+      isSocialMedia: platform !== 'rss'
+    };
+    
+    // تحليل الكلمات المفتاحية مع أوزان مختلفة
+    const keywordWeights = {
+      locations: 1,
+      villages: 1,
+      proHouthi: 2,
+      antiHouthi: -1,
+      military: 3,
+      security: 2,
+      martyrs: 4,
+      rhetoric: 2,
+      activities: 1,
+      education: 1,
+      economy: 1,
+      health: 1,
+      infrastructure: 1,
+      hashtags: 1,
+      socialMediaTerms: 0.5
+    };
+    
+    // تحليل شامل لكل فئة
+    Object.entries(config.keywords).forEach(([category, keywords]) => {
+      keywords.forEach(keyword => {
+        const normKeyword = normalize(keyword);
+        if (normText.includes(normKeyword)) {
+          analysis.score += keywordWeights[category] || 1;
+          
+          // إضافة الكيان المناسب
+          if (category === 'locations' && !analysis.entities.locations.includes(keyword)) {
+            analysis.entities.locations.push(keyword);
+          } else if (category === 'villages' && !analysis.entities.villages.includes(keyword)) {
+            analysis.entities.villages.push(keyword);
+          } else if (category === 'proHouthi' && !analysis.entities.proHouthi.includes(keyword)) {
+            analysis.entities.proHouthi.push(keyword);
+            analysis.bias = "موالي";
+            analysis.sentiment = "إيجابي";
+          } else if (category === 'antiHouthi' && !analysis.entities.antiHouthi.includes(keyword)) {
+            analysis.entities.antiHouthi.push(keyword);
+            if (analysis.bias === "محايد") analysis.bias = "معادي";
+            analysis.sentiment = "سلبي";
+          } else if (['military', 'security', 'martyrs'].includes(category)) {
+            analysis.entities.events.push(keyword);
+          } else if (category === 'hashtags' && !analysis.entities.hashtags.includes(keyword)) {
+            analysis.entities.hashtags.push(keyword);
+          } else if (category === 'socialMediaTerms') {
+            analysis.entities.socialMediaTerms.push(keyword);
+          }
+          
+          // تحديد الفئة الرئيسية
+          if (!analysis.entities.categories.includes(category)) {
+            analysis.entities.categories.push(category);
+          }
+        }
+      });
+    });
+    
+    // تحديد نوع المحتوى
+    analysis.type = this.determineContentType(analysis);
+    analysis.category = this.determineCategory(analysis);
+    
+    // تحديد الأولوية بناء على التحليل
+    analysis.priority = this.determinePriority(analysis);
+    
+    // تحديد مستوى الثقة
+    analysis.confidence = this.calculateConfidence(analysis);
+    
+    // توليد التوصيات
+    analysis.recommendations = this.generateRecommendations(analysis);
+    
+    return analysis;
+  }
+  
+  static determineContentType(analysis) {
+    if (analysis.isSocialMedia) {
+      if (analysis.entities.martyrs.length > 0) return "🚨 منشور تواصل عن حدث عسكري";
+      if (analysis.entities.military.length > 0) return "⚠️ منشور تواصل عن نشاط عسكري";
+      if (analysis.entities.proHouthi.length > 1) return "🎯 منشور تواصل موالي";
+      return "🗨️ منشور تواصل اجتماعي";
+    }
+    
+    if (analysis.entities.martyrs.length > 0) return "🚨 حدث عسكري/استشهادي";
+    if (analysis.entities.military.length > 0) return "⚠️ نشاط عسكري/تعبوي";
+    if (analysis.entities.proHouthi.length > 2) return "🎯 خطاب/نشاط موالي";
+    if (analysis.entities.antiHouthi.length > 1) return "📢 ذكر معادٍ";
+    if (analysis.entities.activities.length > 0) return "🎉 مناسبة/نشاط";
+    return "🗨️ ذكر عام";
+  }
+  
+  static determineCategory(analysis) {
+    if (analysis.isSocialMedia) return "تواصل اجتماعي";
+    
+    const categories = analysis.entities.categories;
+    if (categories.includes('martyrs')) return "عسكري/أمني";
+    if (categories.includes('military')) return "تعبوي/تدريبي";
+    if (categories.includes('proHouthi')) return "سياسي/تعبوي";
+    return "عام";
+  }
+  
+  static determinePriority(analysis) {
+    const score = analysis.score;
+    if (score >= 10) return "🔥🔥 حرج";
+    if (score >= 7) return "🔥 مرتفع جداً";
+    if (score >= 5) return "⚠️ مرتفع";
+    if (score >= 3) return "📢 متوسط";
+    if (score >= 1) return "ℹ️ منخفض";
+    return "عادي";
+  }
+  
+  static calculateConfidence(analysis) {
+    let confidence = analysis.isSocialMedia ? 50 : 60;
+    const entities = analysis.entities;
+    
+    if (entities.locations.length > 0) confidence += 10;
+    if (entities.proHouthi.length > 0) confidence += 10;
+    if (entities.events.length > 0) confidence += 10;
+    if (analysis.score >= 5) confidence += 10;
+    if (analysis.isSocialMedia && entities.hashtags.length > 0) confidence += 5;
+    
+    return Math.min(confidence, 95);
+  }
+  
+  static generateRecommendations(analysis) {
+    const recommendations = [];
+    
+    if (analysis.entities.martyrs.length > 0) {
+      recommendations.push("المتابعة العاجلة", "توثيق الحدث", "إبلاغ القيادة");
+    } else if (analysis.entities.military.length > 0) {
+      recommendations.push("متابعة النشاط", "تقييم الجهوزية", "توثيق التدريب");
+    } else if (analysis.entities.proHouthi.length > 1) {
+      recommendations.push("توثيق الخطاب", "متابعة النشاط", "تقييم التأثير");
+    }
+    
+    if (analysis.entities.locations.length > 0) {
+      recommendations.push("مراقبة الموقع");
+    }
+    
+    if (analysis.isSocialMedia) {
+      recommendations.push("مراقبة الحساب", "تتبع النقاش");
+    }
+    
+    return recommendations.length > 0 ? recommendations : ["المتابعة الروتينية"];
+  }
+  
+  static analyzeTimeContext(text) {
+    const normText = normalize(text);
+    const timePatterns = {
+      "فوري": /(الآن|حالياً|في هذه اللحظة|منذ قليل|قبل قليل|just now|currently|right now)/i,
+      "يومي": /(اليوم|هذا اليوم|صباح اليوم|مساء اليوم|today|this morning|this evening)/i,
+      "قريب": /(أمس|الأمس|يوم أمس|yesterday|last night)/i,
+      "مستقبلي": /(غداً|بعد غد|الأيام القادمة|المستقبل|tomorrow|next days|future)/i
+    };
+    
+    for (const [type, pattern] of Object.entries(timePatterns)) {
+      if (pattern.test(normText)) {
+        return { type: type, confidence: 80 };
+      }
+    }
+    
+    return { type: "غير محدد", confidence: 50 };
+  }
+}
+
 /* ================== RSS PARSER WITH RETRY ================== */
 class ResilientParser {
   constructor() {
     this.parser = new Parser({
       timeout: 45000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/rss+xml, application/xml, text/xml',
         'Accept-Language': 'ar,en-US;q=0.9,en;q=0.8',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -357,11 +1029,11 @@ class ResilientParser {
       try {
         console.log(`📡 محاولة ${attempt}/${retries} لـ ${url}`);
         
-        // محاولة استخراج البيانات الخام للتحقق
         const response = await fetch(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-          }
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          },
+          timeout: 30000
         });
         
         if (!response.ok) {
@@ -391,432 +1063,6 @@ class ResilientParser {
 }
 
 const resilientParser = new ResilientParser();
-
-/* ================== UTILITY FUNCTIONS ================== */
-function safeURL(url) {
-  try {
-    return encodeURI(decodeURI(url)).replace(/&amp;/g, '&');
-  } catch {
-    return url;
-  }
-}
-
-function normalize(text) {
-  if (!text) return '';
-  return text.toString().toLowerCase()
-    .replace(/[^\w\s\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function generateHash(content) {
-  return crypto.createHash("sha256").update(content).digest("hex");
-}
-
-function saveData() {
-  try {
-    fs.writeFileSync(sentFile, JSON.stringify([...sent], null, 2));
-    fs.writeFileSync(dailyFile, JSON.stringify(daily, null, 2));
-    fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
-    fs.writeFileSync(reportFile, JSON.stringify(reports, null, 2));
-    fs.writeFileSync(locationsFile, JSON.stringify(locationsActivity, null, 2));
-    BackupSystem.backup();
-  } catch (error) {
-    console.error('❌ خطأ في حفظ البيانات:', error.message);
-  }
-}
-
-/* ================== ADVANCED INTELLIGENCE ANALYSIS ================== */
-class AdvancedIntelligenceAnalyzer {
-  static analyze(text, source) {
-    const normText = normalize(text);
-    const analysis = {
-      score: 0,
-      type: "ذكر عادي",
-      category: "عام",
-      priority: "منخفض",
-      bias: "محايد",
-      entities: {
-        proHouthi: [],
-        antiHouthi: [],
-        locations: [],
-        villages: [],
-        events: [],
-        categories: []
-      },
-      sentiment: "محايد",
-      recommendations: [],
-      confidence: 60,
-      timeContext: this.analyzeTimeContext(text)
-    };
-    
-    // تحليل الكلمات المفتاحية مع أوزان مختلفة
-    const keywordWeights = {
-      locations: 1,
-      villages: 1,
-      proHouthi: 2,
-      antiHouthi: -1,
-      military: 3,
-      security: 2,
-      martyrs: 4,
-      rhetoric: 2,
-      activities: 1,
-      education: 1,
-      economy: 1,
-      health: 1,
-      infrastructure: 1
-    };
-    
-    // تحليل شامل لكل فئة
-    Object.entries(config.keywords).forEach(([category, keywords]) => {
-      keywords.forEach(keyword => {
-        const normKeyword = normalize(keyword);
-        if (normText.includes(normKeyword)) {
-          analysis.score += keywordWeights[category] || 1;
-          
-          // إضافة الكيان المناسب
-          if (category === 'locations' && !analysis.entities.locations.includes(keyword)) {
-            analysis.entities.locations.push(keyword);
-          } else if (category === 'villages' && !analysis.entities.villages.includes(keyword)) {
-            analysis.entities.villages.push(keyword);
-          } else if (category === 'proHouthi' && !analysis.entities.proHouthi.includes(keyword)) {
-            analysis.entities.proHouthi.push(keyword);
-            analysis.bias = "موالي";
-            analysis.sentiment = "إيجابي";
-          } else if (category === 'antiHouthi' && !analysis.entities.antiHouthi.includes(keyword)) {
-            analysis.entities.antiHouthi.push(keyword);
-            if (analysis.bias === "محايد") analysis.bias = "معادي";
-            analysis.sentiment = "سلبي";
-          } else if (['military', 'security', 'martyrs'].includes(category)) {
-            analysis.entities.events.push(keyword);
-          }
-          
-          // تحديد الفئة الرئيسية
-          if (!analysis.entities.categories.includes(category)) {
-            analysis.entities.categories.push(category);
-          }
-        }
-      });
-    });
-    
-    // تحديد نوع المحتوى
-    analysis.type = this.determineContentType(analysis);
-    analysis.category = this.determineCategory(analysis);
-    
-    // تحديد الأولوية بناء على التحليل
-    analysis.priority = this.determinePriority(analysis);
-    
-    // تحديد مستوى الثقة
-    analysis.confidence = this.calculateConfidence(analysis);
-    
-    // توليد التوصيات
-    analysis.recommendations = this.generateRecommendations(analysis);
-    
-    return analysis;
-  }
-  
-  static determineContentType(analysis) {
-    if (analysis.entities.martyrs.length > 0) return "🚨 حدث عسكري/استشهادي";
-    if (analysis.entities.military.length > 0) return "⚠️ نشاط عسكري/تعبوي";
-    if (analysis.entities.proHouthi.length > 2) return "🎯 خطاب/نشاط موالي";
-    if (analysis.entities.antiHouthi.length > 1) return "📢 ذكر معادٍ";
-    if (analysis.entities.activities.length > 0) return "🎉 مناسبة/نشاط";
-    if (analysis.entities.education.length > 0) return "📚 تعليمي/دعوي";
-    if (analysis.entities.health.length > 0) return "🏥 صحي/خدمي";
-    if (analysis.entities.economy.length > 0) return "💰 اقتصادي/معيشي";
-    return "🗨️ ذكر عام";
-  }
-  
-  static determineCategory(analysis) {
-    const categories = analysis.entities.categories;
-    if (categories.includes('martyrs')) return "عسكري/أمني";
-    if (categories.includes('military')) return "تعبوي/تدريبي";
-    if (categories.includes('proHouthi')) return "سياسي/تعبوي";
-    if (categories.includes('activities')) return "اجتماعي/مناسبات";
-    if (categories.includes('education')) return "تعليمي/دعوي";
-    if (categories.includes('health')) return "صحي/خدمي";
-    if (categories.includes('economy')) return "اقتصادي/معيشي";
-    return "عام";
-  }
-  
-  static determinePriority(analysis) {
-    const score = analysis.score;
-    if (score >= 10) return "🔥🔥 حرج";
-    if (score >= 7) return "🔥 مرتفع جداً";
-    if (score >= 5) return "⚠️ مرتفع";
-    if (score >= 3) return "📢 متوسط";
-    if (score >= 1) return "ℹ️ منخفض";
-    return "عادي";
-  }
-  
-  static calculateConfidence(analysis) {
-    let confidence = 60;
-    const entities = analysis.entities;
-    
-    if (entities.locations.length > 0) confidence += 10;
-    if (entities.proHouthi.length > 0) confidence += 10;
-    if (entities.events.length > 0) confidence += 10;
-    if (analysis.score >= 5) confidence += 10;
-    
-    return Math.min(confidence, 95);
-  }
-  
-  static generateRecommendations(analysis) {
-    const recommendations = [];
-    
-    if (analysis.entities.martyrs.length > 0) {
-      recommendations.push("المتابعة العاجلة", "توثيق الحدث", "إبلاغ القيادة");
-    } else if (analysis.entities.military.length > 0) {
-      recommendations.push("متابعة النشاط", "تقييم الجهوزية", "توثيق التدريب");
-    } else if (analysis.entities.proHouthi.length > 1) {
-      recommendations.push("توثيق الخطاب", "متابعة النشاط", "تقييم التأثير");
-    }
-    
-    if (analysis.entities.locations.length > 0) {
-      recommendations.push("مراقبة الموقع");
-    }
-    
-    return recommendations.length > 0 ? recommendations : ["المتابعة الروتينية"];
-  }
-  
-  static analyzeTimeContext(text) {
-    const normText = normalize(text);
-    if (/(الآن|حالياً|في هذه اللحظة|منذ قليل|قبل قليل)/.test(normText)) {
-      return { type: "فوري", confidence: 80 };
-    }
-    if (/(اليوم|هذا اليوم|صباح اليوم|مساء اليوم)/.test(normText)) {
-      return { type: "يومي", confidence: 90 };
-    }
-    if (/(أمس|الأمس|يوم أمس)/.test(normText)) {
-      return { type: "قريب", confidence: 85 };
-    }
-    if (/(غداً|بعد غد|الأيام القادمة|المستقبل)/.test(normText)) {
-      return { type: "مستقبلي", confidence: 70 };
-    }
-    return { type: "غير محدد", confidence: 50 };
-  }
-  
-  static generateComprehensiveReport(date) {
-    const today = date || new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    // تجميع أحداث اليوم
-    const todayEvents = daily.filter(event => {
-      const eventDate = new Date(event.time);
-      return eventDate.toDateString() === today.toDateString();
-    });
-    
-    // تحليل الإحصائيات
-    const stats = this.analyzeDailyStatistics(todayEvents);
-    
-    // تحليل الأنماط
-    const patterns = this.identifyPatterns(todayEvents);
-    
-    // تحديد التهديدات
-    const threats = this.assessThreats(todayEvents);
-    
-    // تقييم الجهوزية
-    const readiness = this.evaluateReadiness(todayEvents);
-    
-    // التقرير الاستخباراتي الشامل
-    const report = {
-      metadata: {
-        classification: "تقرير يومي استخباراتي شامل",
-        date: this.formatArabicDate(today),
-        hijriDate: this.getHijriDate(today),
-        location: "مديرية الدريهمي – محافظة الحديدة",
-        preparedBy: "استخبارات (المربع الجنوبي)",
-        securityLevel: "عادي",
-        reportNumber: `RPT-${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`,
-        period: "24 ساعة الماضية"
-      },
-      
-      executiveSummary: this.generateExecutiveSummary(stats, today),
-      
-      detailedAnalysis: {
-        eventsBreakdown: this.getEventsBreakdown(todayEvents),
-        temporalAnalysis: this.analyzeTemporalPatterns(todayEvents),
-        spatialAnalysis: this.analyzeSpatialPatterns(todayEvents),
-        sentimentAnalysis: this.analyzeSentiment(todayEvents)
-      },
-      
-      confirmedEvents: this.getConfirmedEvents(todayEvents),
-      
-      fieldSecurity: {
-        overallStatus: this.getSecurityStatus(todayEvents),
-        incidents: this.getSecurityIncidents(todayEvents),
-        patrolsActivities: this.getPatrolsActivities(todayEvents),
-        assessment: this.getSecurityAssessment(todayEvents)
-      },
-      
-      popularMobilization: {
-        level: stats.readinessLevel,
-        activities: stats.proEvents,
-        locations: stats.hotspots.slice(0, 3).map(h => h.location),
-        description: this.getMobilizationDescription(stats)
-      },
-      
-      politicalIdeological: {
-        discourse: this.analyzePoliticalDiscourse(todayEvents),
-        loyaltyIndicators: this.getLoyaltyIndicators(todayEvents),
-        communityEngagement: this.getCommunityEngagement(todayEvents)
-      },
-      
-      civilianStatus: {
-        livingConditions: this.assessLivingConditions(todayEvents),
-        servicesStatus: this.assessServicesStatus(todayEvents),
-        communityCohesion: "المجتمع المحلي متكيف مع الظروف، ويظهر تعاوناً مع الجهود الأمنية والمجتمعية."
-      },
-      
-      intelligenceAssessment: {
-        threatLevel: stats.threatLevel,
-        readinessLevel: stats.readinessLevel,
-        intelligenceQuality: stats.intelligenceLevel,
-        popularSupport: stats.popularSupport,
-        emergingPatterns: patterns,
-        riskAssessment: threats
-      },
-      
-      hotspotsAnalysis: {
-        activeLocations: stats.hotspots.map(h => ({
-          location: h.location,
-          events: h.count,
-          types: h.types,
-          risk: h.count >= 3 ? "مرتفع" : h.count >= 2 ? "متوسط" : "منخفض"
-        })),
-        recommendations: this.getHotspotRecommendations(stats.hotspots)
-      },
-      
-      sourceAnalysis: {
-        reliableSources: this.getReliableSources(todayEvents),
-        sourceBias: this.analyzeSourceBias(todayEvents),
-        informationGaps: this.identifyInformationGaps(todayEvents)
-      },
-      
-      forecast: {
-        shortTerm: this.generateShortTermForecast(todayEvents, patterns),
-        mediumTerm: this.generateMediumTermForecast(todayEvents, stats),
-        recommendations: this.getForecastRecommendations(threats, readiness)
-      },
-      
-      rawData: {
-        totalEvents: todayEvents.length,
-        proEvents: stats.proEvents,
-        antiEvents: stats.antiEvents,
-        highPriority: stats.highPriorityEvents,
-        sourcesCount: stats.sourcesCount,
-        categoriesBreakdown: stats.categories
-      },
-      
-      annex: {
-        timeline: this.generateTimeline(todayEvents),
-        glossary: this.getIntelligenceGlossary(),
-        methodology: "التحليل الاستخباراتي المبني على المصادر المفتوحة (OSINT) مع منهجية تحليل موجهة"
-      }
-    };
-    
-    return report;
-  }
-  
-  static analyzeDailyStatistics(events) {
-    const proEvents = events.filter(e => e.analysis.bias === "موالي");
-    const antiEvents = events.filter(e => e.analysis.bias === "معادي");
-    const highPriority = events.filter(e => e.analysis.priority.includes("🔥"));
-    
-    // تحليل المواقع
-    const locationCounts = {};
-    events.forEach(event => {
-      event.analysis.entities.locations.forEach(loc => {
-        locationCounts[loc] = (locationCounts[loc] || 0) + 1;
-      });
-    });
-    
-    const hotspots = Object.entries(locationCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([loc, count]) => ({
-        location: loc,
-        count: count,
-        types: [...new Set(events
-          .filter(e => e.analysis.entities.locations.includes(loc))
-          .map(e => e.analysis.type))]
-      }));
-    
-    // تحليل الفئات
-    const categories = {};
-    events.forEach(event => {
-      const category = event.analysis.category;
-      categories[category] = (categories[category] || 0) + 1;
-    });
-    
-    // تحليل المصادر
-    const sources = [...new Set(events.map(e => e.source))];
-    
-    return {
-      totalEvents: events.length,
-      proEvents: proEvents.length,
-      antiEvents: antiEvents.length,
-      highPriorityEvents: highPriority.length,
-      hotspots: hotspots,
-      categories: categories,
-      sourcesCount: sources.length,
-      threatLevel: highPriority.length > 2 ? "متوسط-مرتفع" : 
-                  highPriority.length > 0 ? "متوسط" : "منخفض",
-      readinessLevel: proEvents.length > 5 ? "مرتفع" : 
-                     proEvents.length > 2 ? "متوسط" : "منخفض",
-      intelligenceLevel: events.length > 8 ? "عالية" :
-                        events.length > 4 ? "متوسطة" : "منخفضة",
-      popularSupport: proEvents.length > antiEvents.length * 2 ? "قوي ومستمر" :
-                     proEvents.length > antiEvents.length ? "متوسط" : "ضعيف"
-    };
-  }
-  
-  static generateExecutiveSummary(stats, date) {
-    const dateStr = `${date.getDate()} ${date.toLocaleDateString('ar-YE', { month: 'long' })} ${date.getFullYear()}`;
-    
-    let summary = `ارفع إليكم من خلال المتابعة الميدانية المباشرة ليوم ${dateStr} في مديرية الدريهمي، `;
-    
-    if (stats.proEvents > 0) {
-      summary += `سُجّل نشاط تعبوي وشعبي مؤكد تمثّل في ${stats.proEvents} حدث موالي، `;
-    } else {
-      summary += `لم تسجل أحداث تعبوية مؤكدة، `;
-    }
-    
-    if (stats.highPriorityEvents > 0) {
-      summary += `مع تسجيل ${stats.highPriorityEvents} حدث عالي الأولوية. `;
-    } else {
-      summary += `وكل الأحداث ضمن المستوى الطبيعي. `;
-    }
-    
-    summary += `يعكس النشاط المسجل مستوى الجهوزية والاستعداد القائم ${stats.readinessLevel === 'مرتفع' ? 'المرتفع' : 'المتوسط'}، `;
-    summary += `ويؤكد حالة الانتقال الشعبي حول القضايا الوطنية والقومية، `;
-    summary += `دون تسجيل أي اختراقات أمنية أو مواجهات عسكرية داخل المديرية.`;
-    
-    return summary;
-  }
-  
-  static formatArabicDate(date) {
-    const options = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    };
-    return date.toLocaleDateString('ar-YE', options);
-  }
-  
-  static getHijriDate(date) {
-    // هذه دالة مبسطة، في التطبيق الحقيقي تحتاج مكتبة تحويل التاريخ الهجري
-    const hijriMonths = ["محرم", "صفر", "ربيع الأول", "ربيع الثاني", "جمادى الأولى", "جمادى الآخرة", 
-                        "رجب", "شعبان", "رمضان", "شوال", "ذو القعدة", "ذو الحجة"];
-    const randomMonth = hijriMonths[Math.floor(Math.random() * hijriMonths.length)];
-    const randomDay = Math.floor(Math.random() * 29) + 1;
-    const hijriYear = 1446 + Math.floor(Math.random() * 2);
-    
-    return `${randomDay} ${randomMonth} ${hijriYear} هـ`;
-  }
-}
 
 /* ================== RESILIENT TELEGRAM BOT ================== */
 class ResilientTelegramBot {
@@ -856,23 +1102,34 @@ class ResilientTelegramBot {
     return await this.sendWithRetry('sendMessage', data);
   }
   
-  static async sendImmediateAlert(item, analysis) {
+  static async sendImmediateAlert(item, analysis, isSocialMedia = false) {
     const alertLevel = analysis.priority.includes("🔥🔥") ? "🚨🚨" : 
                      analysis.priority.includes("🔥") ? "🚨" : "⚠️";
     
+    const platformIcon = isSocialMedia ? {
+      'twitter': '🐦',
+      'facebook': '📘',
+      'telegram': '📨',
+      'aggregator': '🔗',
+      'generic': '🌐'
+    }[analysis.platform] || '📱' : '📰';
+    
     const message = `
-${alertLevel} <b>تنبيه فوري - ${analysis.type}</b>
-${alertLevel} <b>الأولوية:</b> ${analysis.priority}
+${alertLevel} <b>${isSocialMedia ? 'منشور تواصل اجتماعي' : 'خبر جديد'} - ${analysis.type}</b>
+${alertLevel} <b>الأولوية:</b> ${analysis.priority} ${platformIcon}
 
 <b>📍 الموقع:</b> ${analysis.entities.locations[0] || analysis.entities.villages[0] || "الدريهمي"}
 <b>🎯 الجانب:</b> ${analysis.bias}
 <b>📊 التصنيف:</b> ${analysis.category}
+${isSocialMedia ? `<b>📱 المنصة:</b> ${analysis.platform}` : ''}
 
-<b>📰 العنوان:</b>
-${item.title?.slice(0, 150) || "حدث جديد"}
+<b>📰 ${isSocialMedia ? 'النص:' : 'العنوان:'}</b>
+${(item.text || item.title || "حدث جديد").slice(0, 150)}
+
+${item.author ? `<b>👤 المؤلف:</b> ${item.author}` : ''}
 
 <b>🔍 الكيانات البارزة:</b>
-${[...analysis.entities.proHouthi, ...analysis.entities.events]
+${[...analysis.entities.proHouthi, ...analysis.entities.events, ...analysis.entities.hashtags]
   .slice(0, 3)
   .join(' • ') || "نشاط موالي"}
 
@@ -882,10 +1139,10 @@ ${[...analysis.entities.proHouthi, ...analysis.entities.events]
 ${analysis.recommendations.length > 0 ? 
   `<b>💡 التوصيات:</b>\n${analysis.recommendations[0]}` : ''}
 
-<b>🔗 المصدر:</b> ${item.source}
+<b>🔗 ${isSocialMedia ? 'المصدر:' : 'المصدر:'}</b> ${item.source || 'وسائل التواصل'}
 <b>🕐 الوقت:</b> ${new Date().toLocaleTimeString('ar-YE')}
 ━━━━━━━━━━━━━━━━━━━━
-<i>سيتم تضمين هذا الحدث في التقرير اليومي الساعة 00:00</i>
+<i>${isSocialMedia ? 'تم رصد هذا المنشور على مواقع التواصل' : 'سيتم تضمين هذا الحدث في التقرير اليومي الساعة 00:00'}</i>
     `.trim();
     
     await this.sendMessage(message, { 
@@ -893,154 +1150,22 @@ ${analysis.recommendations.length > 0 ?
       silent: !analysis.priority.includes("🔥") 
     });
   }
-  
-  static async sendDailyReport(report) {
-    console.log('📨 جاري إرسال التقرير اليومي...');
-    
-    const reportParts = this.splitReport(report);
-    
-    for (let i = 0; i < reportParts.length; i++) {
-      const part = reportParts[i];
-      const isFirst = i === 0;
-      const isLast = i === reportParts.length - 1;
-      
-      const message = isFirst ? `
-📄 <b>${report.metadata.classification.toUpperCase()}</b>
-${'━'.repeat(40)}
-
-<b>الصفة:</b> ${report.metadata.classification}
-<b>التاريخ:</b> ${report.metadata.date}
-<b>التاريخ الهجري:</b> ${report.metadata.hijriDate}
-<b>المكان:</b> ${report.metadata.location}
-<b>الجهة المعدّة:</b> ${report.metadata.preparedBy}
-<b>درجة السرية:</b> ${report.metadata.securityLevel}
-<b>رقم التقرير:</b> ${report.metadata.reportNumber}
-<b>الفترة:</b> ${report.metadata.period}
-
-${'━'.repeat(40)}
-<b>الملخص التنفيذي</b>
-${report.executiveSummary}
-
-${'━'.repeat(40)}
-      `.trim() + part : part;
-      
-      await this.sendMessage(message, {
-        preview: false,
-        silent: !isFirst
-      });
-      
-      // تأجيل بين الأجزاء
-      if (!isLast) {
-        await new Promise(resolve => setTimeout(resolve, 1500));
-      }
-    }
-    
-    console.log('✅ تم إرسال التقرير اليومي بنجاح');
-  }
-  
-  static splitReport(report) {
-    const parts = [];
-    let currentPart = '';
-    
-    // إضافة الأحداث المؤكدة
-    let eventsText = '';
-    if (report.confirmedEvents.length > 0) {
-      eventsText = `
-<b>الأحداث المؤكدة لليوم</b>
-${report.confirmedEvents.map((e, i) => 
-  `${i+1}. <b>${e.type}</b>\n   المكان: ${e.location}\n   الوقت: ${e.time}\n   ${e.description}`
-).join('\n\n')}
-      `.trim();
-    } else {
-      eventsText = "<b>الأحداث المؤكدة</b>\n• لم تسجل أحداث مؤكدة اليوم";
-    }
-    
-    // إضافة الوضع الميداني
-    const fieldText = `
-<b>الوضع الميداني والأمني</b>
-• الحالة العامة: ${report.fieldSecurity.overallStatus}
-• الحوادث المسجلة: ${report.fieldSecurity.incidents}
-• ${report.fieldSecurity.assessment}
-    `.trim();
-    
-    // إضافة النشاط الشعبي
-    const popularText = `
-<b>النشاط الشعبي والتعبوي</b>
-• المستوى: ${report.popularMobilization.level}
-• الأنشطة: ${report.popularMobilization.activities} نشاط
-• المواقع النشطة: ${report.popularMobilization.locations.join('، ')}
-• ${report.detailedAnalysis.sentimentAnalysis.description}
-    `.trim();
-    
-    // إضافة التقييم الاستخباراتي
-    const intelText = `
-<b>التقييم الاستخباراتي</b>
-• مستوى التهديد: ${report.intelligenceAssessment.threatLevel}
-• مستوى الجهوزية: ${report.intelligenceAssessment.readinessLevel}
-• جودة المعلومات: ${report.intelligenceAssessment.intelligenceQuality}
-• الاحتضان الشعبي: ${report.intelligenceAssessment.popularSupport}
-
-<b>النقاط الساخنة:</b>
-${report.hotspotsAnalysis.activeLocations.map(h => 
-  `• ${h.location} (${h.events} حدث - ${h.risk})`
-).join('\n')}
-
-<b>الأنماط الملاحظة:</b>
-${report.intelligenceAssessment.emergingPatterns.map(p => `• ${p}`).join('\n')}
-    `.trim();
-    
-    // إضافة التقدير النهائي
-    const finalText = `
-<b>التقدير الأمني</b>
-الاستقرار القائم يعكس فعالية الجاهزية والانتشار، ويؤكد فشل أي محاولات لإرباك الوضع الأمني داخل المديرية.
-
-<b>الرأي الختامي</b>
-${report.executiveSummary.split('. ').slice(-1)[0]}
-
-<b>التوصيات</b>
-${report.hotspotsAnalysis.recommendations.map(r => `• ${r}`).join('\n')}
-
-━━━━━━━━━━━━━━━━━━━━
-<b>البيانات الإحصائية</b>
-• إجمالي الأحداث: ${report.rawData.totalEvents}
-• الأحداث الموالية: ${report.rawData.proEvents}
-• الأحداث المعادية: ${report.rawData.antiEvents}
-• الأحداث عالية الأولوية: ${report.rawData.highPriority}
-• عدد المصادر: ${report.rawData.sourcesCount}
-
-━━━━━━━━━━━━━━━━━━━━
-<i>تم إعداد هذا التقرير آلياً بواسطة نظام الرصد الاستخباراتي المتطور (OSINT Monitor)</i>
-<i>وقت الإصدار: ${new Date().toLocaleTimeString('ar-YE')}</i>
-<i>التقرير القادم: الساعة 00:00</i>
-    `.trim();
-    
-    // تقسيم المحتوى إلى أجزاء
-    const sections = [eventsText, fieldText, popularText, intelText, finalText];
-    
-    for (const section of sections) {
-      if (currentPart.length + section.length < 3500) {
-        currentPart += (currentPart ? '\n\n' : '') + section;
-      } else {
-        parts.push(currentPart);
-        currentPart = section;
-      }
-    }
-    
-    if (currentPart) {
-      parts.push(currentPart);
-    }
-    
-    return parts;
-  }
 }
 
-/* ================== ADVANCED SCANNER WITH LOAD BALANCING ================== */
+/* ================== ADVANCED SCANNER ================== */
 class AdvancedScanner {
   static async scanSource(source, attempt = 1) {
     try {
       console.log(`🔍 [${source.category}] جاري فحص: ${source.name}`);
       
-      const feed = await resilientParser.parseURL(safeURL(source.url));
+      let feed;
+      if (source.type === 'rss') {
+        feed = await resilientParser.parseURL(safeURL(source.url));
+      } else {
+        // للمصادر غير RSS، نقوم بالتحقق فقط
+        return [];
+      }
+      
       const results = [];
       
       for (const item of feed.items || []) {
@@ -1055,7 +1180,7 @@ class AdvancedScanner {
         sent.add(itemHash);
         
         // التحليل المتقدم
-        const analysis = AdvancedIntelligenceAnalyzer.analyze(content, source.name);
+        const analysis = AdvancedIntelligenceAnalyzer.analyze(content, source.name, 'rss');
         
         const record = {
           id: itemHash,
@@ -1096,7 +1221,6 @@ class AdvancedScanner {
     } catch (error) {
       console.error(`❌ [${source.category}] خطأ في ${source.name} (المحاولة ${attempt}):`, error.message);
       
-      // تسجيل الخطأ في الإحصائيات
       if (!stats.sourceStats[source.name]) {
         stats.sourceStats[source.name] = { scans: 0, matches: 0, errors: 0 };
       }
@@ -1111,6 +1235,72 @@ class AdvancedScanner {
     }
   }
   
+  static async scanSocialMedia(source, attempt = 1) {
+    try {
+      console.log(`📱 [${source.category}] جاري فحص وسائل التواصل: ${source.name}`);
+      
+      const results = await SocialMediaScraper.scrapeWebsite(
+        safeURL(source.url), 
+        source.platform
+      );
+      
+      const processedResults = [];
+      
+      for (const item of results) {
+        const itemHash = generateHash(`${item.link || ''}${item.timestamp}${item.text.substring(0, 200)}`);
+        
+        if (sent.has(itemHash)) continue;
+        sent.add(itemHash);
+        
+        // التحليل المتقدم
+        const analysis = AdvancedIntelligenceAnalyzer.analyze(item.text, source.name, source.platform);
+        
+        const record = {
+          id: itemHash,
+          timestamp: new Date().toISOString(),
+          source: source.name,
+          sourceCategory: source.category,
+          sourceBias: source.bias,
+          platform: source.platform,
+          text: item.text,
+          author: item.author,
+          link: item.link,
+          pubDate: item.timestamp,
+          analysis: analysis,
+          rawContent: item.text
+        };
+        
+        processedResults.push(record);
+        
+        // معالجة السجل
+        await this.processSocialMediaRecord(record, source);
+      }
+      
+      // تحديث إحصائيات المنصة
+      if (!stats.platformStats[source.platform]) {
+        stats.platformStats[source.platform] = { scans: 0, matches: 0 };
+      }
+      stats.platformStats[source.platform].scans++;
+      stats.platformStats[source.platform].matches += processedResults.length;
+      
+      // تحديث وقت آخر فحص للمصدر
+      socialMediaCache.lastScans[source.url] = new Date().toISOString();
+      
+      console.log(`✅ [${source.category}] ${source.name}: ${processedResults.length} نتيجة`);
+      return processedResults;
+      
+    } catch (error) {
+      console.error(`❌ [${source.category}] خطأ في ${source.name} (المحاولة ${attempt}):`, error.message);
+      
+      if (attempt < config.maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, config.retryDelay * attempt));
+        return await this.scanSocialMedia(source, attempt + 1);
+      }
+      
+      return [];
+    }
+  }
+  
   static quickKeywordCheck(text) {
     const normText = normalize(text);
     
@@ -1118,7 +1308,8 @@ class AdvancedScanner {
     const quickCheckKeywords = [
       ...config.keywords.locations.slice(0, 10),
       ...config.keywords.proHouthi.slice(0, 5),
-      ...config.keywords.military.slice(0, 3)
+      ...config.keywords.military.slice(0, 3),
+      ...config.keywords.hashtags.slice(0, 3)
     ];
     
     for (const keyword of quickCheckKeywords) {
@@ -1175,22 +1366,100 @@ class AdvancedScanner {
       analysis: record.analysis,
       locations: record.analysis.entities.locations,
       villages: record.analysis.entities.villages,
-      categories: record.analysis.entities.categories
+      categories: record.analysis.entities.categories,
+      isSocialMedia: false
     });
-    
-    // الحفاظ على حجم البيانات
-    if (daily.length > 1000) {
-      daily = daily.slice(-800);
-    }
     
     // إرسال تنبيه فوري للأحداث المهمة
     if (record.analysis.priority.includes("🔥") || 
         (record.analysis.bias === "موالي" && record.analysis.score >= 3)) {
-      await ResilientTelegramBot.sendImmediateAlert(record, record.analysis);
+      await ResilientTelegramBot.sendImmediateAlert(record, record.analysis, false);
     }
     
     // حفظ البيانات بشكل دوري
     if (stats.totalMatches % 10 === 0) {
+      saveData();
+    }
+  }
+  
+  static async processSocialMediaRecord(record, source) {
+    // تحديث الإحصائيات العامة
+    stats.totalMatches++;
+    stats.socialMediaMatches++;
+    
+    if (record.analysis.bias === "موالي") {
+      stats.proHouthiEvents++;
+    } else if (record.analysis.bias === "معادي") {
+      stats.antiHouthiEvents++;
+    }
+    
+    // تحديث نشاط المواقع
+    record.analysis.entities.locations.forEach(location => {
+      if (!locationsActivity[location]) {
+        locationsActivity[location] = {
+          count: 0,
+          lastSeen: null,
+          types: new Set(),
+          categories: new Set(),
+          bias: {}
+        };
+      }
+      
+      locationsActivity[location].count++;
+      locationsActivity[location].lastSeen = record.timestamp;
+      locationsActivity[location].types.add(record.analysis.type);
+      locationsActivity[location].categories.add(record.analysis.category);
+      
+      if (!locationsActivity[location].bias[record.analysis.bias]) {
+        locationsActivity[location].bias[record.analysis.bias] = 0;
+      }
+      locationsActivity[location].bias[record.analysis.bias]++;
+    });
+    
+    // تحديث الهاشتاقات المتداولة
+    record.analysis.entities.hashtags.forEach(hashtag => {
+      if (!socialMediaCache.trendingHashtags.find(h => h.tag === hashtag)) {
+        socialMediaCache.trendingHashtags.push({
+          tag: hashtag,
+          count: 1,
+          firstSeen: record.timestamp,
+          lastSeen: record.timestamp,
+          platform: record.platform
+        });
+      } else {
+        const hashtagObj = socialMediaCache.trendingHashtags.find(h => h.tag === hashtag);
+        hashtagObj.count++;
+        hashtagObj.lastSeen = record.timestamp;
+      }
+    });
+    
+    // إضافة إلى السجل اليومي
+    daily.push({
+      id: record.id,
+      time: record.timestamp,
+      source: record.source,
+      sourceCategory: record.sourceCategory,
+      sourceBias: record.sourceBias,
+      platform: record.platform,
+      title: record.text?.substring(0, 100) || 'منشور تواصل اجتماعي',
+      author: record.author,
+      link: record.link,
+      analysis: record.analysis,
+      locations: record.analysis.entities.locations,
+      villages: record.analysis.entities.villages,
+      categories: record.analysis.entities.categories,
+      hashtags: record.analysis.entities.hashtags,
+      isSocialMedia: true
+    });
+    
+    // إرسال تنبيه فوري للأحداث المهمة
+    if (record.analysis.priority.includes("🔥") || 
+        (record.analysis.bias === "موالي" && record.analysis.score >= 2)) {
+      await ResilientTelegramBot.sendImmediateAlert(record, record.analysis, true);
+    }
+    
+    // حفظ البيانات بشكل دوري
+    if (stats.socialMediaMatches % 5 === 0) {
       saveData();
     }
   }
@@ -1205,18 +1474,18 @@ class AdvancedScanner {
     const allResults = [];
     const sourcesByPriority = [...config.sources].sort((a, b) => a.priority - b.priority);
     
-    // فحص المصادر حسب الأولوية مع موازنة الحمل
+    // فحص المصادر التقليدية
     for (let i = 0; i < sourcesByPriority.length; i++) {
       const source = sourcesByPriority[i];
       
-      // تأجيل ذكي بين المصادر بناء على الأولوية
+      if (source.type !== 'rss') continue;
+      
       const delay = source.priority * 1000 + (Math.random() * 2000);
       await new Promise(resolve => setTimeout(resolve, delay));
       
       const results = await this.scanSource(source);
       allResults.push(...results);
       
-      // حفظ البيانات بعد كل 3 مصادر
       if ((i + 1) % 3 === 0) {
         saveData();
       }
@@ -1226,10 +1495,52 @@ class AdvancedScanner {
     
     // إرسال ملخص الفحص
     if (allResults.length > 0) {
-      await this.sendIntelligentSummary(allResults, scanDuration);
+      await this.sendIntelligentSummary(allResults, scanDuration, false);
     }
     
-    console.log(`✅ اكتمل الفحص في ${scanDuration} ثانية. النتائج: ${allResults.length}`);
+    console.log(`✅ اكتمل فحص المصادر في ${scanDuration} ثانية. النتائج: ${allResults.length}`);
+    
+    return allResults;
+  }
+  
+  static async scanSocialMediaSources() {
+    console.log('📱 بدء فحص وسائل التواصل الاجتماعي...');
+    
+    const startTime = Date.now();
+    stats.lastSocialScan = new Date().toISOString();
+    
+    const allResults = [];
+    const socialSources = [...config.socialMediaMirrors].sort((a, b) => a.priority - b.priority);
+    
+    // فحص مصادر التواصل الاجتماعي
+    for (let i = 0; i < socialSources.length; i++) {
+      const source = socialSources[i];
+      
+      // فحص متباعد لتجنب الحظر
+      const delay = source.priority * 2000 + (Math.random() * 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      const results = await this.scanSocialMedia(source);
+      allResults.push(...results);
+      
+      // اكتشاف مصادر جديدة كل 5 فحوصات
+      if (i % 5 === 0 && i > 0) {
+        await this.discoverNewSocialMediaSources();
+      }
+      
+      if ((i + 1) % 3 === 0) {
+        saveData();
+      }
+    }
+    
+    const scanDuration = Math.round((Date.now() - startTime) / 1000);
+    
+    // إرسال ملخص فحص التواصل الاجتماعي
+    if (allResults.length > 0) {
+      await this.sendIntelligentSummary(allResults, scanDuration, true);
+    }
+    
+    console.log(`✅ اكتمل فحص التواصل الاجتماعي في ${scanDuration} ثانية. النتائج: ${allResults.length}`);
     
     // حفظ نهائي للبيانات
     saveData();
@@ -1237,7 +1548,47 @@ class AdvancedScanner {
     return allResults;
   }
   
-  static async sendIntelligentSummary(results, duration) {
+  static async discoverNewSocialMediaSources() {
+    console.log('🔍 جاري اكتشاف مصادر تواصل اجتماعي جديدة...');
+    
+    try {
+      const newSources = await SocialMediaScraper.discoverNewSources();
+      
+      for (const source of newSources) {
+        if (!socialMediaCache.discoveredAccounts.includes(source.url)) {
+          socialMediaCache.discoveredAccounts.push(source.url);
+          
+          // إضافة إلى قائمة المصادر الديناميكية
+          config.socialMediaMirrors.push({
+            name: `مصدر مكتشف - ${source.platform}`,
+            url: source.url,
+            priority: 3,
+            bias: "اجتماعي",
+            category: "تواصل_اجتماعي",
+            type: "web_scrape",
+            platform: source.platform
+          });
+          
+          console.log(`✅ تم اكتشاف مصدر جديد: ${source.url}`);
+        }
+      }
+      
+      if (newSources.length > 0) {
+        await ResilientTelegramBot.sendMessage(
+          `🆕 <b>اكتشاف مصادر جديدة</b>\n\n` +
+          `تم اكتشاف ${newSources.length} مصدر جديد لوسائل التواصل الاجتماعي.\n` +
+          `سيتم مراقبتها في الفحوصات القادمة.`
+        );
+      }
+      
+      saveData();
+      
+    } catch (error) {
+      console.error('❌ خطأ في اكتشاف مصادر جديدة:', error.message);
+    }
+  }
+  
+  static async sendIntelligentSummary(results, duration, isSocialMedia = false) {
     const proResults = results.filter(r => r.analysis.bias === "موالي");
     const highPriority = results.filter(r => r.analysis.priority.includes("🔥"));
     
@@ -1254,15 +1605,18 @@ class AdvancedScanner {
       .map(([cat, count]) => `${cat}: ${count}`)
       .join('، ');
     
+    const platformInfo = isSocialMedia ? 
+      `<b>📱 المنصات:</b> ${[...new Set(results.map(r => r.platform))].join('، ')}\n` : '';
+    
     const message = `
-📊 <b>ملخص الفحص الاستخباراتي الذكي</b>
+📊 <b>ملخص فحص ${isSocialMedia ? 'التواصل الاجتماعي' : 'المصادر'}</b>
 ${'━'.repeat(40)}
 
 <b>⏱️ المدة:</b> ${duration} ثانية
-<b>🔍 النتائج:</b> ${results.length} حدث
+<b>🔍 النتائج:</b> ${results.length} ${isSocialMedia ? 'منشور' : 'حدث'}
 <b>🎯 الأحداث الموالية:</b> ${proResults.length}
 <b>🚨 الأحداث عالية الأولوية:</b> ${highPriority.length}
-
+${platformInfo}
 <b>📈 الفئات النشطة:</b>
 ${topCategories || "لا توجد"}
 
@@ -1275,8 +1629,7 @@ ${Object.entries(locationsActivity)
 
 <b>🕐 وقت الفحص:</b> ${new Date().toLocaleString('ar-YE')}
 ${'━'.repeat(40)}
-<i>تم فحص ${config.sources.length} مصدر مختلف</i>
-<i>سيتم إصدار التقرير اليومي الساعة 00:00</i>
+<i>${isSocialMedia ? 'تم فحص مرايا وسائل التواصل الاجتماعي' : 'تم فحص المصادر التقليدية'}</i>
     `.trim();
     
     await ResilientTelegramBot.sendMessage(message, { silent: true });
@@ -1286,13 +1639,11 @@ ${'━'.repeat(40)}
 /* ================== RELIABLE REPORT SCHEDULER ================== */
 class ReliableReportScheduler {
   static scheduleDailyReport() {
-    // حساب الوقت حتى منتصف الليل
     const now = new Date();
     const midnight = new Date(now);
     midnight.setHours(24, 0, 0, 0);
     let timeUntilMidnight = midnight - now;
     
-    // إذا كان الوقت بعد منتصف الليل، جدوله للغد
     if (timeUntilMidnight < 0) {
       midnight.setDate(midnight.getDate() + 1);
       timeUntilMidnight = midnight - now;
@@ -1305,7 +1656,7 @@ class ReliableReportScheduler {
         console.log('📅 بدء إعداد التقرير اليومي الشامل...');
         
         // توليد التقرير المتقدم
-        const report = AdvancedIntelligenceAnalyzer.generateComprehensiveReport(new Date());
+        const report = this.generateDailyReport();
         
         // حفظ التقرير
         reports.push({
@@ -1314,25 +1665,24 @@ class ReliableReportScheduler {
           stats: {
             totalEvents: daily.length,
             proEvents: stats.proHouthiEvents,
-            antiEvents: stats.antiHouthiEvents
+            antiEvents: stats.antiHouthiEvents,
+            socialMediaEvents: stats.socialMediaMatches
           }
         });
         
-        // حفظ أحدث 50 تقرير فقط
         if (reports.length > 50) {
           reports = reports.slice(-30);
         }
         
         stats.lastReport = new Date().toISOString();
-        saveData();
         
         // إرسال التقرير عبر Telegram
-        await ResilientTelegramBot.sendDailyReport(report);
+        await this.sendDailyReport(report);
         
         // أرشفة أحداث اليوم
         this.archiveDailyData();
         
-        // إعادة ضبط السجل اليومي مع الاحتفاظ بالأحداث المهمة
+        // إعادة ضبط السجل اليومي
         this.resetDailyData();
         
         console.log('✅ تم إرسال التقرير اليومي وإعادة ضبط البيانات');
@@ -1340,7 +1690,6 @@ class ReliableReportScheduler {
       } catch (error) {
         console.error('❌ خطأ في إعداد التقرير اليومي:', error);
         
-        // محاولة إرسال رسالة خطأ
         try {
           await ResilientTelegramBot.sendMessage(
             `❌ <b>خطأ في إعداد التقرير اليومي</b>\n\n` +
@@ -1351,13 +1700,176 @@ class ReliableReportScheduler {
           console.error('❌ فشل في إرسال رسالة الخطأ:', telegramError);
         }
       } finally {
-        // جدولة التقرير التالي
         this.scheduleDailyReport();
       }
     }, timeUntilMidnight);
     
-    // تخزين المؤقت للإشارة المرجعية
     this.reportTimer = reportTimer;
+  }
+  
+  static generateDailyReport() {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // تجميع أحداث اليوم
+    const todayEvents = daily.filter(event => {
+      const eventDate = new Date(event.time);
+      return eventDate.toDateString() === today.toDateString();
+    });
+    
+    // تحليل الإحصائيات
+    const socialMediaEvents = todayEvents.filter(e => e.isSocialMedia);
+    const proEvents = todayEvents.filter(e => e.analysis.bias === "موالي");
+    const antiEvents = todayEvents.filter(e => e.analysis.bias === "معادي");
+    const highPriority = todayEvents.filter(e => e.analysis.priority.includes("🔥"));
+    
+    // تحليل المنصات
+    const platformStats = {};
+    socialMediaEvents.forEach(event => {
+      const platform = event.platform || 'غير معروف';
+      platformStats[platform] = (platformStats[platform] || 0) + 1;
+    });
+    
+    // تحليل المواقع
+    const locationCounts = {};
+    todayEvents.forEach(event => {
+      event.locations.forEach(loc => {
+        locationCounts[loc] = (locationCounts[loc] || 0) + 1;
+      });
+    });
+    
+    const hotspots = Object.entries(locationCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([loc, count]) => ({
+        location: loc,
+        count: count
+      }));
+    
+    // التقرير
+    const report = {
+      metadata: {
+        classification: "تقرير يومي استخباراتي شامل",
+        date: this.formatArabicDate(today),
+        period: "24 ساعة الماضية",
+        location: "مديرية الدريهمي – محافظة الحديدة"
+      },
+      
+      summary: {
+        totalEvents: todayEvents.length,
+        socialMediaEvents: socialMediaEvents.length,
+        proEvents: proEvents.length,
+        antiEvents: antiEvents.length,
+        highPriorityEvents: highPriority.length,
+        platforms: platformStats,
+        hotspots: hotspots
+      },
+      
+      socialMediaAnalysis: {
+        totalPosts: socialMediaEvents.length,
+        byPlatform: platformStats,
+        trendingHashtags: socialMediaCache.trendingHashtags
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10),
+        discoveredAccounts: socialMediaCache.discoveredAccounts.length
+      },
+      
+      notableEvents: todayEvents
+        .filter(e => e.analysis.priority.includes("🔥") || e.analysis.score >= 5)
+        .slice(0, 10)
+        .map(e => ({
+          type: e.analysis.type,
+          source: e.source,
+          platform: e.platform,
+          locations: e.locations,
+          priority: e.analysis.priority,
+          time: new Date(e.time).toLocaleTimeString('ar-YE')
+        })),
+      
+      recommendations: this.generateRecommendations(todayEvents)
+    };
+    
+    return report;
+  }
+  
+  static formatArabicDate(date) {
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('ar-YE', options);
+  }
+  
+  static generateRecommendations(events) {
+    const recommendations = [];
+    
+    const highPriorityCount = events.filter(e => e.analysis.priority.includes("🔥")).length;
+    if (highPriorityCount > 3) {
+      recommendations.push("زيادة المراقبة الأمنية في النقاط الساخنة");
+    }
+    
+    const socialMediaCount = events.filter(e => e.isSocialMedia).length;
+    if (socialMediaCount > 10) {
+      recommendations.push("تعزيز مراقبة وسائل التواصل الاجتماعي");
+    }
+    
+    const proEventsCount = events.filter(e => e.analysis.bias === "موالي").length;
+    if (proEventsCount > 5) {
+      recommendations.push("تقييم النشاط التعبوي والاستعدادات");
+    }
+    
+    if (recommendations.length === 0) {
+      recommendations.push("الاستمرار في المراقبة الروتينية");
+    }
+    
+    return recommendations;
+  }
+  
+  static async sendDailyReport(report) {
+    console.log('📨 جاري إرسال التقرير اليومي...');
+    
+    const message = `
+📄 <b>${report.metadata.classification.toUpperCase()}</b>
+${'━'.repeat(40)}
+
+<b>التاريخ:</b> ${report.metadata.date}
+<b>الفترة:</b> ${report.metadata.period}
+<b>المكان:</b> ${report.metadata.location}
+
+<b>ملخص النشاط:</b>
+• إجمالي الأحداث: ${report.summary.totalEvents}
+• منشورات التواصل: ${report.summary.socialMediaEvents}
+• أحداث موالية: ${report.summary.proEvents}
+• أحداث معادية: ${report.summary.antiEvents}
+• أحداث عالية الأولوية: ${report.summary.highPriorityEvents}
+
+<b>منصات التواصل الاجتماعي:</b>
+${Object.entries(report.socialMediaAnalysis.byPlatform)
+  .map(([platform, count]) => `• ${platform}: ${count} منشور`)
+  .join('\n')}
+
+<b>الهاشتاقات المتداولة:</b>
+${report.socialMediaAnalysis.trendingHashtags
+  .map(h => `• ${h.tag} (${h.count} ذكر)`)
+  .join('\n') || '• لا توجد'}
+
+<b>النقاط الساخنة:</b>
+${report.summary.hotspots
+  .map(h => `• ${h.location}: ${h.count} نشاط`)
+  .join('\n')}
+
+<b>التوصيات:</b>
+${report.recommendations.map(r => `• ${r}`).join('\n')}
+
+━━━━━━━━━━━━━━━━━━━━
+<i>تم إعداد هذا التقرير آلياً بواسطة نظام الرصد الاستخباراتي المتطور</i>
+<i>وقت الإصدار: ${new Date().toLocaleTimeString('ar-YE')}</i>
+    `.trim();
+    
+    await ResilientTelegramBot.sendMessage(message);
   }
   
   static archiveDailyData() {
@@ -1375,7 +1887,8 @@ class ReliableReportScheduler {
         date: archiveDate,
         events: daily,
         stats: stats,
-        locationsActivity: locationsActivity
+        locationsActivity: locationsActivity,
+        socialMediaCache: socialMediaCache
       };
       
       fs.writeFileSync(archiveFile, JSON.stringify(archiveData, null, 2));
@@ -1393,78 +1906,19 @@ class ReliableReportScheduler {
     );
     
     daily = importantEvents;
-    stats.proHouthiEvents = importantEvents.filter(e => e.analysis.bias === "موالي").length;
-    stats.antiHouthiEvents = importantEvents.filter(e => e.analysis.bias === "معادي").length;
     
-    // تنظيف نشاط المواقع القديم
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    Object.keys(locationsActivity).forEach(location => {
-      if (!locationsActivity[location].lastSeen || 
-          new Date(locationsActivity[location].lastSeen) < yesterday) {
-        if (locationsActivity[location].count < 3) {
-          delete locationsActivity[location];
-        }
-      }
-    });
+    // تنظيف الذاكرة المؤقتة
+    socialMediaCache.trendingHashtags = socialMediaCache.trendingHashtags
+      .filter(h => h.count > 1)
+      .slice(0, 20);
     
     saveData();
-  }
-}
-
-/* ================== HEALTH MONITOR ================== */
-class HealthMonitor {
-  static start() {
-    // مراقبة الذاكرة
-    setInterval(() => {
-      const memoryUsage = process.memoryUsage();
-      const memoryMB = Math.round(memoryUsage.heapUsed / 1024 / 1024);
-      
-      if (memoryMB > 500) {
-        console.warn(`⚠️ استخدام عالي للذاكرة: ${memoryMB} MB`);
-        
-        // تنظيف الذاكرة
-        if (global.gc) {
-          global.gc();
-        }
-      }
-    }, 5 * 60 * 1000); // كل 5 دقائق
-    
-    // إرسال تقرير صحي يومي
-    setInterval(async () => {
-      const uptime = process.uptime();
-      const hours = Math.floor(uptime / 3600);
-      const minutes = Math.floor((uptime % 3600) / 60);
-      
-      const healthReport = `
-🏥 <b>تقرير الصحة النظامي</b>
-${'━'.repeat(40)}
-
-<b>⏱️ وقت التشغيل:</b> ${hours} ساعة ${minutes} دقيقة
-<b>🔍 إجمالي الفحوصات:</b> ${stats.totalScans}
-<b>📊 النتائج الإجمالية:</b> ${stats.totalMatches}
-<b>🎯 الأحداث الموالية:</b> ${stats.proHouthiEvents}
-<b>📡 المصادر النشطة:</b> ${Object.keys(stats.sourceStats).length}
-
-<b>💾 استخدام الذاكرة:</b> ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)} MB
-<b>📈 عدد الأحداث اليوم:</b> ${daily.length}
-<b>🔄 آخر فحص:</b> ${stats.lastScan ? new Date(stats.lastScan).toLocaleTimeString('ar-YE') : 'لم يتم'}
-
-<b>✅ الحالة:</b> تشغيل طبيعي
-${'━'.repeat(40)}
-<i>النظام يعمل باستقرار تام</i>
-      `.trim();
-      
-      await ResilientTelegramBot.sendMessage(healthReport, { silent: true });
-    }, 12 * 60 * 60 * 1000); // كل 12 ساعة
   }
 }
 
 /* ================== ENHANCED DASHBOARD ================== */
 const app = express();
 
-// Middleware للتعامل مع Render
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
@@ -1479,239 +1933,96 @@ app.get('/', (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام الرصد الاستخباراتي - الدريهمي</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            padding: 30px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 3px solid #4a5568;
-            padding-bottom: 20px;
-        }
-        h1 {
-            color: #2d3748;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #4a5568;
-            font-size: 1.2em;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-        }
-        .stat-value {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .stat-label {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-        .btn {
-            background: #4a5568;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background 0.3s;
-            margin: 5px;
-        }
-        .btn:hover {
-            background: #2d3748;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .sources-list {
-            background: #f7fafc;
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        .source-item {
-            background: white;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 5px solid #4a5568;
-        }
-        .active {
-            border-left-color: #48bb78;
-        }
-        .error {
-            border-left-color: #f56565;
-        }
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #718096;
-            font-size: 0.9em;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
-        }
-        .logs {
-            background: #2d3748;
-            color: #cbd5e0;
-            padding: 15px;
-            border-radius: 10px;
-            font-family: monospace;
-            height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-        .log-success { color: #68d391; }
-        .log-error { color: #fc8181; }
-        .log-warning { color: #f6e05e; }
-        .log-info { color: #63b3ed; }
+        body { font-family: 'Arial', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #4a5568; padding-bottom: 20px; }
+        h1 { color: #2d3748; font-size: 2em; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #4a5568; color: white; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.8em; font-weight: bold; margin: 5px 0; }
+        .btn { background: #4a5568; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #2d3748; }
+        .sources-list { background: #f7fafc; border-radius: 8px; padding: 15px; margin-top: 20px; }
+        .source-item { background: white; margin: 8px 0; padding: 10px; border-radius: 5px; border-left: 4px solid #4a5568; }
+        .social-media { border-left-color: #4299e1 !important; }
+        footer { text-align: center; margin-top: 30px; color: #718096; font-size: 0.9em; padding-top: 20px; border-top: 1px solid #e2e8f0; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🚀 النظام الاستخباراتي المتطور</h1>
-            <div class="subtitle">🎯 رصد وتحليل الأخبار في مديرية الدريهمي - محافظة الحديدة</div>
-            <div style="margin-top: 15px;">
-                <span style="background: #48bb78; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em;">
-                    ⚡ الحالة: نشط
+            <div>🎯 رصد وتحليل الأخبار في مديرية الدريهمي</div>
+            <div style="margin-top: 10px;">
+                <span style="background: #48bb78; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em;">
+                    ⚡ نشط
                 </span>
-                <span style="background: #4299e1; color: white; padding: 5px 15px; border-radius: 20px; margin-left: 10px; font-size: 0.9em;">
-                    🎯 التوجيه: تحيز استخباراتي حوثي شامل
+                <span style="background: #4299e1; color: white; padding: 5px 10px; border-radius: 15px; margin-left: 5px; font-size: 0.8em;">
+                    📱 مراقبة التواصل الاجتماعي
                 </span>
             </div>
         </header>
         
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">🔍 الفحوصات الإجمالية</div>
+                <div>🔍 الفحوصات الإجمالية</div>
                 <div class="stat-value">${stats.totalScans}</div>
-                <div>آخر فحص: ${stats.lastScan ? new Date(stats.lastScan).toLocaleString('ar-YE') : 'لم يتم'}</div>
             </div>
-            
             <div class="stat-card">
-                <div class="stat-label">🎯 الأحداث الموالية</div>
+                <div>🎯 الأحداث الموالية</div>
                 <div class="stat-value">${stats.proHouthiEvents}</div>
-                <div>نشاط تعبوي مسجل</div>
             </div>
-            
             <div class="stat-card">
-                <div class="stat-label">📊 النتائج الإجمالية</div>
+                <div>📊 النتائج الإجمالية</div>
                 <div class="stat-value">${stats.totalMatches}</div>
-                <div>حدث تم رصده</div>
             </div>
-            
             <div class="stat-card">
-                <div class="stat-label">⏱️ وقت التشغيل</div>
-                <div class="stat-value">${Math.floor(process.uptime() / 3600)}h</div>
-                <div>ساعة من العمل المستمر</div>
+                <div>📱 منشورات التواصل</div>
+                <div class="stat-value">${stats.socialMediaMatches}</div>
             </div>
         </div>
         
-        <div style="text-align: center; margin: 30px 0;">
-            <button class="btn btn-primary" onclick="scanNow()">🔍 فحص فوري</button>
-            <button class="btn" onclick="refreshStats()">🔄 تحديث الإحصائيات</button>
-            <button class="btn btn-danger" onclick="shutdownSystem()">🛑 إيقاف النظام</button>
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn" onclick="scanNow()">🔍 فحص فوري</button>
+            <button class="btn" onclick="scanSocial()">📱 فحص التواصل</button>
+            <button class="btn" onclick="location.reload()">🔄 تحديث</button>
         </div>
         
         <div class="sources-list">
-            <h3 style="color: #2d3748; margin-bottom: 20px;">📡 المصادر النشطة (${config.sources.length} مصدر)</h3>
-            ${config.sources.map(source => `
-                <div class="source-item ${stats.sourceStats[source.name]?.errors > 2 ? 'error' : 'active'}">
+            <h3>📡 المصادر النشطة</h3>
+            ${config.sources.concat(config.socialMediaMirrors).slice(0, 10).map(source => `
+                <div class="source-item ${source.type === 'web_scrape' ? 'social-media' : ''}">
                     <strong>${source.name}</strong> 
-                    <span style="float: left; background: #e2e8f0; padding: 2px 10px; border-radius: 10px; font-size: 0.8em;">
-                        ${source.category} - ${source.bias}
+                    <span style="float: left; background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 0.7em;">
+                        ${source.type === 'web_scrape' ? '📱 ' : ''}${source.category}
                     </span>
-                    <div style="color: #718096; font-size: 0.9em; margin-top: 5px;">
-                        ${source.url.substring(0, 60)}...
-                    </div>
-                    <div style="font-size: 0.8em; color: #4a5568; margin-top: 5px;">
-                        عمليات المسح: ${stats.sourceStats[source.name]?.scans || 0} | 
-                        النتائج: ${stats.sourceStats[source.name]?.matches || 0} |
-                        الأخطاء: ${stats.sourceStats[source.name]?.errors || 0}
-                    </div>
                 </div>
             `).join('')}
         </div>
         
-        <div class="logs">
-            <div class="log-info">📝 سجل النظام:</div>
-            <div class="log-success">✅ النظام يعمل بشكل طبيعي</div>
-            <div class="log-info">🕐 ${new Date().toLocaleString('ar-YE')} - جاهز للمراقبة</div>
-            <div class="log-info">📊 ${daily.length} حدث في سجل اليوم</div>
-            <div class="log-info">🎯 ${Object.keys(locationsActivity).length} موقع نشط</div>
-        </div>
-        
         <footer>
-            <div>💻 النظام الاستخباراتي المتطور v3.0 - OSINT Intelligence Monitor</div>
-            <div>📍 منطقة التغطية: مديرية الدريهمي - محافظة الحديدة - الجمهورية اليمنية</div>
-            <div>🛡️ درجة السرية: عادية | 🎯 التوجيه: تحيز استخباراتي حوثي شامل</div>
-            <div style="margin-top: 10px; color: #a0aec0;">
-                آخر تحديث: ${new Date().toLocaleString('ar-YE')} | 
-                التقرير القادم: الساعة 00:00
-            </div>
+            <div>💻 النظام الاستخباراتي المتطور v4.0</div>
+            <div>📍 منطقة التغطية: مديرية الدريهمي - محافظة الحديدة</div>
+            <div>🕐 آخر تحديث: ${new Date().toLocaleString('ar-YE')}</div>
         </footer>
     </div>
     
     <script>
-        function scanNow() {
-            fetch('/api/v1/scan', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message || 'تم الفحص بنجاح');
-                    refreshStats();
-                })
-                .catch(error => {
-                    alert('خطأ في الفحص: ' + error.message);
-                });
-        }
-        
-        function refreshStats() {
+        async function scanNow() {
+            const response = await fetch('/api/scan', { method: 'POST' });
+            const data = await response.json();
+            alert(data.message);
             location.reload();
         }
         
-        function shutdownSystem() {
-            if (confirm('⚠️ هل أنت متأكد من إيقاف النظام؟')) {
-                alert('جاري إيقاف النظام... يرجى الانتظار');
-                // هنا يمكن إضافة كود لإيقاف النظام
-            }
+        async function scanSocial() {
+            const response = await fetch('/api/scan-social', { method: 'POST' });
+            const data = await response.json();
+            alert(data.message);
+            location.reload();
         }
         
-        // تحديث تلقائي كل 30 ثانية
-        setTimeout(refreshStats, 30000);
+        setInterval(() => location.reload(), 60000);
     </script>
 </body>
 </html>
@@ -1721,85 +2032,58 @@ app.get('/', (req, res) => {
 });
 
 // API endpoints
-app.get('/api/v1/stats', (req, res) => {
-  res.json({
-    success: true,
-    system: {
-      uptime: process.uptime(),
-      version: "3.0.0",
-      bias: "موالي - استخباراتي",
-      nextReport: new Date(new Date().setHours(24, 0, 0, 0)).toLocaleString('ar-YE')
-    },
-    intelligence: {
-      today: {
-        total: daily.filter(e => new Date(e.time).toDateString() === new Date().toDateString()).length,
-        pro: stats.proHouthiEvents,
-        anti: stats.antiHouthiEvents,
-        highPriority: daily.filter(e => e.analysis.priority.includes("🔥")).length
-      },
-      sources: stats.sourceStats,
-      categories: stats.categoryStats,
-      hotspots: Object.entries(locationsActivity)
-        .sort((a, b) => b[1].count - a[1].count)
-        .slice(0, 10)
-        .map(([loc, data]) => ({
-          location: loc,
-          count: data.count,
-          lastSeen: data.lastSeen,
-          bias: data.bias
-        }))
-    }
-  });
-});
-
-app.post('/api/v1/scan', async (req, res) => {
+app.post('/api/scan', async (req, res) => {
   try {
     const results = await AdvancedScanner.intelligentScan();
-    res.json({
-      success: true,
-      message: `تم الفحص بنجاح. النتائج: ${results.length}`,
-      details: {
-        proEvents: results.filter(r => r.analysis.bias === "موالي").length,
-        highPriority: results.filter(r => r.analysis.priority.includes("🔥")).length
-      }
+    res.json({ 
+      success: true, 
+      message: `تم الفحص بنجاح. النتائج: ${results.length}` 
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-app.get('/api/v1/health', (req, res) => {
+app.post('/api/scan-social', async (req, res) => {
+  try {
+    const results = await AdvancedScanner.scanSocialMediaSources();
+    res.json({ 
+      success: true, 
+      message: `تم فحص التواصل الاجتماعي. النتائج: ${results.length}` 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get('/api/stats', (req, res) => {
   res.json({
-    status: 'operational',
-    timestamp: new Date().toISOString(),
-    render: {
-      region: process.env.RENDER_REGION || 'unknown',
-      service: process.env.RENDER_SERVICE_ID || 'local'
+    system: {
+      uptime: process.uptime(),
+      version: "4.0",
+      coverage: "الدريهمي والحديدة"
     },
-    resources: {
-      memory: process.memoryUsage(),
-      uptime: process.uptime()
+    stats: {
+      totalScans: stats.totalScans,
+      totalMatches: stats.totalMatches,
+      socialMediaMatches: stats.socialMediaMatches,
+      proEvents: stats.proHouthiEvents,
+      lastScan: stats.lastScan,
+      lastSocialScan: stats.lastSocialScan
     }
   });
 });
-
-// Serve static files
-app.use(express.static('public'));
 
 /* ================== MAIN APPLICATION ================== */
 class OSINTApplication {
   static async start() {
     try {
-      console.log('🚀 بدء تشغيل النظام الاستخباراتي المتطور...');
-      console.log('🎯 التوجيه: تحيز استخباراتي حوثي شامل');
-      console.log(`📡 المصادر: ${config.sources.length} مصدر متنوع`);
-      console.log(`📍 المنطقة: مديرية الدريهمي بالكامل`);
-      console.log(`⚙️ الإعدادات: فحص كل ${config.scanInterval / 60000} دقيقة`);
+      console.log('🚀 بدء تشغيل النظام الاستخباراتي المتطور v4.0...');
+      console.log('🎯 النظام يشمل الآن مراقبة وسائل التواصل الاجتماعي');
+      console.log(`📡 مصادر RSS: ${config.sources.length} مصدر`);
+      console.log(`📱 مرايا التواصل: ${config.socialMediaMirrors.length} مصدر`);
       
-      // استعادة النسخة الاحتياطية إذا كانت متوفرة
+      // استعادة النسخة الاحتياطية
       BackupSystem.restore();
       
       // إرسال رسالة بدء التشغيل
@@ -1808,25 +2092,19 @@ class OSINTApplication {
       // بدء الخادم
       app.listen(config.port, () => {
         console.log(`🌐 لوحة التحكم تعمل على: http://localhost:${config.port}`);
-        console.log(`📡 واجهة API: /api/v1/stats`);
-        console.log(`🏥 مراقبة الصحة: نشطة`);
       });
       
       // جدولة التقرير اليومي
       ReliableReportScheduler.scheduleDailyReport();
       
-      // بدء مراقبة الصحة
-      HealthMonitor.start();
+      // بدء الفحص الدوري للمصادر التقليدية
+      this.startSourceScanner();
       
-      // الفحص الأولي
-      console.log('🔍 بدء الفحص الاستخباراتي الأولي...');
-      await AdvancedScanner.intelligentScan();
+      // بدء الفحص الدوري لوسائل التواصل الاجتماعي
+      this.startSocialMediaScanner();
       
-      // جدولة الفحوصات الدورية مع استقرار
-      this.startStableScheduler();
-      
-      // Keep-alive ping لـ Render
-      this.startKeepAlive();
+      // اكتشاف مصادر جديدة كل 6 ساعات
+      this.startSourceDiscovery();
       
       console.log('✅ النظام يعمل بكامل طاقته وجاهز للمراقبة المستمرة');
       
@@ -1839,30 +2117,64 @@ class OSINTApplication {
   
   static async sendStartupMessage() {
     const message = `
-🚀 <b>بدء تشغيل النظام الاستخباراتي المتطور</b>
+🚀 <b>بدء تشغيل النظام الاستخباراتي المتطور v4.0</b>
 ${'━'.repeat(40)}
 
-<b>🏛️ النظام:</b> Advanced OSINT Intelligence Monitor v3.0
-<b>🎯 التوجيه:</b> تحيز استخباراتي حوثي شامل
+<b>🏛️ النظام:</b> Advanced OSINT Intelligence Monitor v4.0
+<b>🎯 الميزة الجديدة:</b> مراقبة وسائل التواصل الاجتماعي
 <b>📍 المنطقة:</b> مديرية الدريهمي - محافظة الحديدة
-<b>📡 المصادر:</b> ${config.sources.length} مصدر متنوع
-<b>⏱️ الفحص كل:</b> ${config.scanInterval / 60000} دقيقة
-<b>📅 التقرير اليومي:</b> 00:00 توقيت محلي
-<b>🕐 وقت البدء:</b> ${new Date().toLocaleString('ar-YE')}
+<b>📡 مصادر RSS:</b> ${config.sources.length} مصدر
+<b>📱 مرايا التواصل:</b> ${config.socialMediaMirrors.length} مصدر
+<b>⏱️ فحص المصادر:</b> كل ${config.scanInterval / 60000} دقيقة
+<b>📱 فحص التواصل:</b> كل ${config.socialMediaScanInterval / 60000} دقيقة
 
 <b>📊 الإحصائيات المخزنة:</b>
 • الفحوصات: ${stats.totalScans}
 • الأحداث الموالية: ${stats.proHouthiEvents}
-• الأحداث المعادية: ${stats.antiHouthiEvents}
-• آخر تقرير: ${stats.lastReport ? new Date(stats.lastReport).toLocaleString('ar-YE') : 'لم يتم'}
+• منشورات التواصل: ${stats.socialMediaMatches}
 
-🔍 <b>جاري بدء المراقبة الاستخباراتية الشاملة...</b>
+🔍 <b>جاري بدء المراقبة الشاملة...</b>
 
-<i>ملاحظة: هذا النظام يعمل بتحيز استخباراتي واضح حسب التوجيهات المحددة</i>
-<i>ويتميز باستقرار عالي للعمل على منصة Render بشكل مستمر</i>
+<i>ملاحظة: النظام يرصد الآن منشورات وسائل التواصل الاجتماعي باللغتين العربية والإنجليزية</i>
     `.trim();
     
     await ResilientTelegramBot.sendMessage(message);
+  }
+  
+  static startSourceScanner() {
+    setInterval(async () => {
+      try {
+        await AdvancedScanner.intelligentScan();
+      } catch (error) {
+        console.error('❌ خطأ في الفحص الدوري:', error.message);
+      }
+    }, config.scanInterval);
+    
+    console.log(`⏰ تم جدولة فحص المصادر كل ${config.scanInterval / 60000} دقيقة`);
+  }
+  
+  static startSocialMediaScanner() {
+    setInterval(async () => {
+      try {
+        await AdvancedScanner.scanSocialMediaSources();
+      } catch (error) {
+        console.error('❌ خطأ في فحص التواصل الاجتماعي:', error.message);
+      }
+    }, config.socialMediaScanInterval);
+    
+    console.log(`⏰ تم جدولة فحص التواصل الاجتماعي كل ${config.socialMediaScanInterval / 60000} دقيقة`);
+  }
+  
+  static startSourceDiscovery() {
+    setInterval(async () => {
+      try {
+        await AdvancedScanner.discoverNewSocialMediaSources();
+      } catch (error) {
+        console.error('❌ خطأ في اكتشاف مصادر جديدة:', error.message);
+      }
+    }, 6 * 60 * 60 * 1000); // كل 6 ساعات
+    
+    console.log('🔍 تم جدولة اكتشاف مصادر جديدة كل 6 ساعات');
   }
   
   static async sendEmergencyAlert(error) {
@@ -1877,72 +2189,11 @@ ${'━'.repeat(40)}
       console.error('❌ فشل في إرسال تنبيه الطوارئ:', telegramError);
     }
   }
-  
-  static startStableScheduler() {
-    let consecutiveFailures = 0;
-    const maxConsecutiveFailures = 5;
-    
-    const scheduledScan = async () => {
-      try {
-        console.log('🔄 بدء الفحص الدوري المجدول...');
-        await AdvancedScanner.intelligentScan();
-        consecutiveFailures = 0; // إعادة تعيين العداد
-      } catch (error) {
-        consecutiveFailures++;
-        console.error(`❌ فشل الفحص (${consecutiveFailures}/${maxConsecutiveFailures}):`, error.message);
-        
-        if (consecutiveFailures >= maxConsecutiveFailures) {
-          console.error('🚨 عدد كبير من الإخفاقات المتتالية، إعادة تشغيل المهمة...');
-          consecutiveFailures = 0;
-          
-          try {
-            await ResilientTelegramBot.sendMessage(
-              `⚠️ <b>إشعار استقرار النظام</b>\n\n` +
-              `تم تجاوز عدد الإخفاقات المسموح به.\n` +
-              `جاري إعادة ضبط مجدول الفحص...`
-            );
-          } catch (telegramError) {
-            console.error('❌ فشل في إرسال إشعار الاستقرار:', telegramError);
-          }
-        }
-      }
-    };
-    
-    // بدء المجدول
-    setInterval(scheduledScan, config.scanInterval);
-    console.log(`⏰ تم جدولة الفحص الدوري كل ${config.scanInterval / 60000} دقيقة`);
-  }
-  
-  static startKeepAlive() {
-    // Keep-alive endpoint لمنع إيقاف Render للتطبيق
-    setInterval(async () => {
-      try {
-        await fetch(`http://localhost:${config.port}/api/v1/health`, {
-          timeout: 10000
-        });
-        console.log('❤️  Keep-alive ping نجح');
-      } catch (error) {
-        console.log('💤 Keep-alive ping فشل (متوقع أثناء التطوير)');
-      }
-    }, 5 * 60 * 1000); // كل 5 دقائق
-  }
 }
 
 /* ================== ERROR HANDLING ================== */
 process.on('uncaughtException', async (error) => {
   console.error('❌ خطأ غير متوقع:', error);
-  
-  try {
-    await ResilientTelegramBot.sendMessage(
-      `⚠️ <b>خطأ غير متوقع في النظام</b>\n\n` +
-      `الخطأ: ${error.message}\n` +
-      `النظام يحاول الاستمرار في العمل...`
-    );
-  } catch (telegramError) {
-    console.error('❌ فشل في إرسال تنبيه الخطأ:', telegramError);
-  }
-  
-  // محاولة حفظ البيانات قبل أي شيء
   saveData();
 });
 
@@ -1962,16 +2213,12 @@ process.on('SIGINT', async () => {
 
 OSINTApplication.gracefulShutdown = async () => {
   console.log('🔄 بدء الإغلاق الآمن...');
-  
-  // حفظ جميع البيانات
   saveData();
   
-  // إرسال رسالة إغلاق
   try {
     await ResilientTelegramBot.sendMessage(
       '🛑 <b>إيقاف النظام الاستخباراتي</b>\n\n' +
       'جاري حفظ البيانات وإغلاق الخدمات...\n' +
-      `آخر فحص: ${stats.lastScan ? new Date(stats.lastScan).toLocaleString('ar-YE') : 'لم يتم'}\n` +
       'سيتم استئناف العمل عند إعادة التشغيل.'
     );
   } catch (error) {
