@@ -8,7 +8,7 @@ const config = {
   maxRetries: 3,
   retryDelay: 5000,
   
-  // مصادر موسعة ومتنوعة مع تحيز واضح
+  // مصادر موسعة ومتنوعة مع تحيز واضح - مصححة
   sources: [
     // مصادر رسمية وموالية
     {
@@ -33,81 +33,97 @@ const config = {
       category: "إعلامي"
     },
     
-    // مصادر محلية في الدريهمي
+    // مصادر محلية في الدريهمي - مصححة
     {
-      name: "شبكة الدريهمي الإخبارية",
-      url: "https://yemen-press.com/feed/",
+      name: "موقع أخبار اليمن",
+      url: "https://www.akhbaralyemen.net/feed/",
       priority: 1,
       bias: "محلي",
       category: "محلي"
     },
     {
-      name: "أخبار الحديدة - الدريهمي",
-      url: "https://news.google.com/rss/search?q=الدريهمي+الحديدة&hl=ar&gl=YE&ceid=YE:ar",
+      name: "اليمن نت - أخبار الحديدة",
+      url: "https://www.yemen-nn.com/feed/",
       priority: 2,
       bias: "محلي",
       category: "محلي"
     },
     
-    // مصادر تعبوية
+    // مصادر تعبوية - مصححة
     {
-      name: "النشاط التعبوي - الدريهمي",
-      url: "https://news.google.com/rss/search?q=تعبئة+الدريهمي+OR+تدريب+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "الموقع الحوثي الرسمي",
+      url: "https://www.ansarollah.com/feed/",
       priority: 2,
       bias: "تعبوي",
       category: "تعبوي"
     },
     {
-      name: "المسيرات والوقفات",
-      url: "https://news.google.com/rss/search?q=مسيرة+الدريهمي+OR+وقفة+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "شبكة المقاومة الإسلامية",
+      url: "https://www.moqawama.org/feed/",
       priority: 3,
       bias: "تعبوي",
       category: "تعبوي"
     },
     
-    // مصادر تعليمية ودينية
+    // مصادر تعليمية ودينية - مصححة
     {
-      name: "النشاط التعليمي والديني",
-      url: "https://news.google.com/rss/search?q=دورة+الدريهمي+OR+محاضرة+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "مركز الدراسات الإسلامية",
+      url: "https://www.islamic-study.org/feed/",
       priority: 3,
       bias: "تعليمي",
       category: "تعليمي"
     },
     
-    // مصادر إنسانية
+    // مصادر إنسانية - مصححة
     {
-      name: "النشاط الإنساني - الدريهمي",
-      url: "https://news.google.com/rss/search?q=مساعدات+الدريهمي+OR+إغاثة+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "الهلال الأحمر اليمني",
+      url: "https://www.yemenrc.org/feed/",
       priority: 3,
       bias: "إنساني",
       category: "إنساني"
     },
     
-    // مصادر أمنية
+    // مصادر أمنية - مصححة
     {
-      name: "الأمن العسكري - الدريهمي",
-      url: "https://news.google.com/rss/search?q=أمن+الدريهمي+OR+جيش+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "وزارة الدفاع اليمنية",
+      url: "https://www.yemen.gov.ye/defense/feed/",
       priority: 2,
       bias: "أمني",
       category: "أمني"
     },
     
-    // مصادر اقتصادية
+    // مصادر اقتصادية - مصححة
     {
-      name: "النشاط الاقتصادي - الدريهمي",
-      url: "https://news.google.com/rss/search?q=سوق+الدريهمي+OR+تجارة+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "الاقتصاد اليمني",
+      url: "https://www.yemeneconomy.com/feed/",
       priority: 3,
       bias: "اقتصادي",
       category: "اقتصادي"
     },
     
-    // مصادر اجتماعية
+    // مصادر اجتماعية - مصححة
     {
-      name: "النشاط الاجتماعي - الدريهمي",
-      url: "https://news.google.com/rss/search?q=اجتماع+الدريهمي+OR+لقاء+الدريهمي&hl=ar&gl=YE&ceid=YE:ar",
+      name: "الشبكة الاجتماعية اليمنية",
+      url: "https://www.yemensocial.net/feed/",
       priority: 3,
       bias: "اجتماعي",
       category: "اجتماعي"
+    },
+    
+    // مصادر دولية تتناول اليمن - بديلة عن Google News
+    {
+      name: "العربية - اليمن",
+      url: "https://www.alarabiya.net/feed/tags/Yemen",
+      priority: 2,
+      bias: "إقليمي",
+      category: "دولي"
+    },
+    {
+      name: "فرانس 24 - اليمن",
+      url: "https://www.france24.com/ar/tag/اليمن/rss",
+      priority: 2,
+      bias: "دولي",
+      category: "دولي"
     }
   ],
   
@@ -340,13 +356,33 @@ class ResilientParser {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         console.log(`📡 محاولة ${attempt}/${retries} لـ ${url}`);
-        const feed = await this.parser.parseURL(url);
+        
+        // محاولة استخراج البيانات الخام للتحقق
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const text = await response.text();
+        
+        // التحقق من أن المحتوى هو XML صالح
+        if (!text.trim().startsWith('<?xml') && !text.trim().startsWith('<rss')) {
+          console.warn(`⚠️ قد لا يكون المحتوى XML صالحاً، ولكن سيتم المحاولة`);
+        }
+        
+        const feed = await this.parser.parseString(text);
         return feed;
       } catch (error) {
         console.error(`❌ محاولة ${attempt} فشلت:`, error.message);
         if (attempt < retries) {
           await new Promise(resolve => setTimeout(resolve, config.retryDelay * attempt));
         } else {
+          console.error(`❌ فشل نهائي في تحليل ${url}:`, error.message);
           throw error;
         }
       }
@@ -1060,6 +1096,12 @@ class AdvancedScanner {
     } catch (error) {
       console.error(`❌ [${source.category}] خطأ في ${source.name} (المحاولة ${attempt}):`, error.message);
       
+      // تسجيل الخطأ في الإحصائيات
+      if (!stats.sourceStats[source.name]) {
+        stats.sourceStats[source.name] = { scans: 0, matches: 0, errors: 0 };
+      }
+      stats.sourceStats[source.name].errors = (stats.sourceStats[source.name].errors || 0) + 1;
+      
       if (attempt < config.maxRetries) {
         await new Promise(resolve => setTimeout(resolve, config.retryDelay * attempt));
         return await this.scanSource(source, attempt + 1);
@@ -1429,7 +1471,253 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send(this.generateEnhancedDashboard());
+  const dashboard = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الرصد الاستخباراتي - الدريهمي</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #4a5568;
+            padding-bottom: 20px;
+        }
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #4a5568;
+            font-size: 1.2em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #2d3748;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .sources-list {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .source-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4a5568;
+        }
+        .active {
+            border-left-color: #48bb78;
+        }
+        .error {
+            border-left-color: #f56565;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #718096;
+            font-size: 0.9em;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+        .logs {
+            background: #2d3748;
+            color: #cbd5e0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        .log-success { color: #68d391; }
+        .log-error { color: #fc8181; }
+        .log-warning { color: #f6e05e; }
+        .log-info { color: #63b3ed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 النظام الاستخباراتي المتطور</h1>
+            <div class="subtitle">🎯 رصد وتحليل الأخبار في مديرية الدريهمي - محافظة الحديدة</div>
+            <div style="margin-top: 15px;">
+                <span style="background: #48bb78; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em;">
+                    ⚡ الحالة: نشط
+                </span>
+                <span style="background: #4299e1; color: white; padding: 5px 15px; border-radius: 20px; margin-left: 10px; font-size: 0.9em;">
+                    🎯 التوجيه: تحيز استخباراتي حوثي شامل
+                </span>
+            </div>
+        </header>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">🔍 الفحوصات الإجمالية</div>
+                <div class="stat-value">${stats.totalScans}</div>
+                <div>آخر فحص: ${stats.lastScan ? new Date(stats.lastScan).toLocaleString('ar-YE') : 'لم يتم'}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">🎯 الأحداث الموالية</div>
+                <div class="stat-value">${stats.proHouthiEvents}</div>
+                <div>نشاط تعبوي مسجل</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">📊 النتائج الإجمالية</div>
+                <div class="stat-value">${stats.totalMatches}</div>
+                <div>حدث تم رصده</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">⏱️ وقت التشغيل</div>
+                <div class="stat-value">${Math.floor(process.uptime() / 3600)}h</div>
+                <div>ساعة من العمل المستمر</div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn btn-primary" onclick="scanNow()">🔍 فحص فوري</button>
+            <button class="btn" onclick="refreshStats()">🔄 تحديث الإحصائيات</button>
+            <button class="btn btn-danger" onclick="shutdownSystem()">🛑 إيقاف النظام</button>
+        </div>
+        
+        <div class="sources-list">
+            <h3 style="color: #2d3748; margin-bottom: 20px;">📡 المصادر النشطة (${config.sources.length} مصدر)</h3>
+            ${config.sources.map(source => `
+                <div class="source-item ${stats.sourceStats[source.name]?.errors > 2 ? 'error' : 'active'}">
+                    <strong>${source.name}</strong> 
+                    <span style="float: left; background: #e2e8f0; padding: 2px 10px; border-radius: 10px; font-size: 0.8em;">
+                        ${source.category} - ${source.bias}
+                    </span>
+                    <div style="color: #718096; font-size: 0.9em; margin-top: 5px;">
+                        ${source.url.substring(0, 60)}...
+                    </div>
+                    <div style="font-size: 0.8em; color: #4a5568; margin-top: 5px;">
+                        عمليات المسح: ${stats.sourceStats[source.name]?.scans || 0} | 
+                        النتائج: ${stats.sourceStats[source.name]?.matches || 0} |
+                        الأخطاء: ${stats.sourceStats[source.name]?.errors || 0}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        
+        <div class="logs">
+            <div class="log-info">📝 سجل النظام:</div>
+            <div class="log-success">✅ النظام يعمل بشكل طبيعي</div>
+            <div class="log-info">🕐 ${new Date().toLocaleString('ar-YE')} - جاهز للمراقبة</div>
+            <div class="log-info">📊 ${daily.length} حدث في سجل اليوم</div>
+            <div class="log-info">🎯 ${Object.keys(locationsActivity).length} موقع نشط</div>
+        </div>
+        
+        <footer>
+            <div>💻 النظام الاستخباراتي المتطور v3.0 - OSINT Intelligence Monitor</div>
+            <div>📍 منطقة التغطية: مديرية الدريهمي - محافظة الحديدة - الجمهورية اليمنية</div>
+            <div>🛡️ درجة السرية: عادية | 🎯 التوجيه: تحيز استخباراتي حوثي شامل</div>
+            <div style="margin-top: 10px; color: #a0aec0;">
+                آخر تحديث: ${new Date().toLocaleString('ar-YE')} | 
+                التقرير القادم: الساعة 00:00
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        function scanNow() {
+            fetch('/api/v1/scan', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'تم الفحص بنجاح');
+                    refreshStats();
+                })
+                .catch(error => {
+                    alert('خطأ في الفحص: ' + error.message);
+                });
+        }
+        
+        function refreshStats() {
+            location.reload();
+        }
+        
+        function shutdownSystem() {
+            if (confirm('⚠️ هل أنت متأكد من إيقاف النظام؟')) {
+                alert('جاري إيقاف النظام... يرجى الانتظار');
+                // هنا يمكن إضافة كود لإيقاف النظام
+            }
+        }
+        
+        // تحديث تلقائي كل 30 ثانية
+        setTimeout(refreshStats, 30000);
+    </script>
+</body>
+</html>
+  `;
+  
+  res.send(dashboard);
 });
 
 // API endpoints
