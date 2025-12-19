@@ -1,4 +1,6 @@
-export const KEYWORDS = {
+/* ================== KEYWORDS ================== */
+
+const KEYWORDS = {
   locations: [
     "الدريهمي",
     "بني مرسي",
@@ -52,3 +54,10 @@ export const KEYWORDS = {
     "إصابة"
   ]
 };
+
+/* ================== تحويل تلقائي لمصفوفة واحدة ================== */
+/* هذا السطر هو مفتاح حل المشكلة */
+export const KEYWORDS_ARRAY = Object.values(KEYWORDS).flat();
+
+/* ================== التصدير ================== */
+export default KEYWORDS;
