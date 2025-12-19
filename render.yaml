@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: osint-intelligence-monitor
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    disk:
+      name: osint-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
